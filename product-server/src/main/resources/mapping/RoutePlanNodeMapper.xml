@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RoutePlanNodeMapper" >
+  <select id="deleteByCondition" parameterType="com.kunlun.erp.core.dto.condition.RoutePlanNodeCondition">
+    delete from route_plan_node where 1=1
+    <if test="node_codes != null and node_codes.size() > 0">
+      <if test="node_code_include ==true">
+        and node_code in
+        <foreach collection="node_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+      <if test="node_code_include ==false">
+        and node_code not in
+        <foreach collection="node_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+    </if>
+    <if test="plan_codes != null and plan_codes.size() > 0">
+      <if test="plan_code_include ==true">
+        and route_plan_code in
+        <foreach collection="plan_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+      <if test="plan_code_include ==false">
+        and route_plan_code not in
+        <foreach collection="plan_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+    </if>
+  </select>
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RoutePlanNode" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="node_code" property="node_code" jdbcType="VARCHAR" />
+    <result column="route_plan_code" property="route_plan_code" jdbcType="VARCHAR" />
+    <result column="node_day" property="node_day" jdbcType="INTEGER" />
+    <result column="traffic_type" property="traffic_type" jdbcType="INTEGER" />
+    <result column="locale_area" property="locale_area" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="has_breakfast" property="has_breakfast" jdbcType="INTEGER" />
+    <result column="has_lunch" property="has_lunch" jdbcType="INTEGER" />
+    <result column="has_dinner" property="has_dinner" jdbcType="INTEGER" />
+    <result column="hotel_description" property="hotel_description" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, node_code,route_plan_code, node_day, traffic_type, locale_area, description,
+    has_breakfast, has_lunch, has_dinner, hotel_description, create_time, update_time, 
+    creator_id, creator_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from route_plan_node
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByNodeCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_plan_node
+    where node_code = #{node_code,jdbcType=VARCHAR}
+  </select>
+
+
+  <select id="selectByRoutePlanCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_plan_node
+    where route_plan_code = #{route_plan_code,jdbcType=VARCHAR} order by id asc
+  </select>
+
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from route_plan_node
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from route_plan_node
+    where route_plan_code in (select r.plan_code from route_plan r where r.product_code=#{product_code})
+  </delete>
+
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RoutePlanNode"  useGeneratedKeys="true" keyProperty="id">
+    insert into route_plan_node
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="node_code != null" >
+        node_code,
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code,
+      </if>
+      <if test="node_day != null" >
+        node_day,
+      </if>
+      <if test="traffic_type != null" >
+        traffic_type,
+      </if>
+      <if test="locale_area != null" >
+        locale_area,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="has_breakfast != null" >
+        has_breakfast,
+      </if>
+      <if test="has_lunch != null" >
+        has_lunch,
+      </if>
+      <if test="has_dinner != null" >
+        has_dinner,
+      </if>
+      <if test="hotel_description != null" >
+        hotel_description,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="node_code != null" >
+        #{node_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="node_day != null" >
+        #{node_day,jdbcType=INTEGER},
+      </if>
+      <if test="traffic_type != null" >
+        #{traffic_type,jdbcType=INTEGER},
+      </if>
+      <if test="locale_area != null" >
+        #{locale_area,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="has_breakfast != null" >
+        #{has_breakfast,jdbcType=INTEGER},
+      </if>
+      <if test="has_lunch != null" >
+        #{has_lunch,jdbcType=INTEGER},
+      </if>
+      <if test="has_dinner != null" >
+        #{has_dinner,jdbcType=INTEGER},
+      </if>
+      <if test="hotel_description != null" >
+        #{hotel_description,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RoutePlanNode" >
+    update route_plan_node
+    <set >
+      <if test="node_code != null" >
+        node_code = #{node_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code = #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="node_day != null" >
+        node_day = #{node_day,jdbcType=INTEGER},
+      </if>
+      <if test="traffic_type != null" >
+        traffic_type = #{traffic_type,jdbcType=INTEGER},
+      </if>
+      <if test="locale_area != null" >
+        locale_area = #{locale_area,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="has_breakfast != null" >
+        has_breakfast = #{has_breakfast,jdbcType=INTEGER},
+      </if>
+      <if test="has_lunch != null" >
+        has_lunch = #{has_lunch,jdbcType=INTEGER},
+      </if>
+      <if test="has_dinner != null" >
+        has_dinner = #{has_dinner,jdbcType=INTEGER},
+      </if>
+      <if test="hotel_description != null" >
+        hotel_description = #{hotel_description,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

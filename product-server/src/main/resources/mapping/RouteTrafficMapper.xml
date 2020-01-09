@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RouteTrafficMapper" >
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.routeHall.RouteTrafficDto" >
+    <result column="traffic_code" property="traffic_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="traffic_type" property="traffic_type" jdbcType="INTEGER" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="departure" property="departure" jdbcType="VARCHAR" />
+    <result column="destination" property="destination" jdbcType="VARCHAR" />
+    <result column="currency" property="currency" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="traffic_count" property="traffic_count" jdbcType="INTEGER" />
+    <result column="fee_total" property="fee_total" jdbcType="DECIMAL" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectDtoByGroupCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select r.traffic_code, r.company_code, get_company_name(r.company_code) as company_name, r.traffic_type,r.departure_date, r.departure,
+    r.destination, r.currency, r.fee,r.traffic_count, r.fee_total,r.remarks from route_traffic r
+    where r.group_code = #{group_code} order by r.id asc
+  </select>
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RouteTraffic" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="traffic_code" property="traffic_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="traffic_type" property="traffic_type" jdbcType="INTEGER" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="departure" property="departure" jdbcType="VARCHAR" />
+    <result column="destination" property="destination" jdbcType="VARCHAR" />
+    <result column="currency" property="currency" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="traffic_count" property="traffic_count" jdbcType="INTEGER" />
+    <result column="fee_total" property="fee_total" jdbcType="DECIMAL" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, traffic_code, group_code, company_code, traffic_type, departure_date, departure, 
+    destination, currency, fee, traffic_count, fee_total, remarks, create_time, update_time, 
+    creator_id, creator_name
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from route_traffic
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByTrafficCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_traffic
+    where traffic_code = #{traffic_code}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from route_traffic
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByGroupCode" parameterType="java.lang.String" >
+    delete from route_traffic
+    where group_code = #{group_code}
+  </delete>
+
+  <delete id="deleteByGroupCodeList" parameterType="java.lang.String" >
+    delete from route_traffic
+    where group_code in
+    <foreach collection="group_code_list" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String" >
+    delete from route_traffic
+    where company_code = #{company_code}
+  </delete>
+
+  <delete id="deleteByGroupCodeAndTrafficCode" >
+    delete from route_traffic
+    where group_code = #{group_code} and traffic_code not in
+    <foreach collection="traffic_codes" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RouteTraffic" useGeneratedKeys="true" keyProperty="id">
+    insert into route_traffic
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="traffic_code != null" >
+        traffic_code,
+      </if>
+      <if test="group_code != null" >
+        group_code,
+      </if>
+      <if test="company_code != null" >
+        company_code,
+      </if>
+      <if test="traffic_type != null" >
+        traffic_type,
+      </if>
+      <if test="departure_date != null" >
+        departure_date,
+      </if>
+      <if test="departure != null" >
+        departure,
+      </if>
+      <if test="destination != null" >
+        destination,
+      </if>
+      <if test="currency != null" >
+        currency,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="traffic_count != null" >
+        traffic_count,
+      </if>
+      <if test="fee_total != null" >
+        fee_total,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="traffic_code != null" >
+        #{traffic_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="traffic_type != null" >
+        #{traffic_type,jdbcType=INTEGER},
+      </if>
+      <if test="departure_date != null" >
+        #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="departure != null" >
+        #{departure,jdbcType=VARCHAR},
+      </if>
+      <if test="destination != null" >
+        #{destination,jdbcType=VARCHAR},
+      </if>
+      <if test="currency != null" >
+        #{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="traffic_count != null" >
+        #{traffic_count,jdbcType=INTEGER},
+      </if>
+      <if test="fee_total != null" >
+        #{fee_total,jdbcType=DECIMAL},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RouteTraffic" >
+    update route_traffic
+    <set >
+      <if test="traffic_code != null" >
+        traffic_code = #{traffic_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        group_code = #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        company_code = #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="traffic_type != null" >
+        traffic_type = #{traffic_type,jdbcType=INTEGER},
+      </if>
+      <if test="departure_date != null" >
+        departure_date = #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="departure != null" >
+        departure = #{departure,jdbcType=VARCHAR},
+      </if>
+      <if test="destination != null" >
+        destination = #{destination,jdbcType=VARCHAR},
+      </if>
+      <if test="currency != null" >
+        currency = #{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="traffic_count != null" >
+        traffic_count = #{traffic_count,jdbcType=INTEGER},
+      </if>
+      <if test="fee_total != null" >
+        fee_total = #{fee_total,jdbcType=DECIMAL},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

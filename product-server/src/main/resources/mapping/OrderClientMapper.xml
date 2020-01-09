@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.OrderClientMapper" >
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.routeOrder.OrderClientDto" >
+    <result column="client_code" property="client_code" jdbcType="VARCHAR" />
+    <result column="order_code" property="order_code" jdbcType="VARCHAR" />
+    <result column="client_name" property="client_name" jdbcType="VARCHAR" />
+    <result column="client_mobile" property="client_mobile" jdbcType="VARCHAR" />
+    <result column="card_type" property="card_type" jdbcType="INTEGER" />
+    <result column="card_number" property="card_number" jdbcType="VARCHAR" />
+    <result column="client_type" property="client_type" jdbcType="INTEGER" />
+    <result column="client_birthday" property="client_birthday" jdbcType="DATE" />
+    <result column="client_sex" property="client_sex" jdbcType="INTEGER" />
+    <result column="client_age" property="client_age" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="ticket_state" property="ticket_state" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="selectDtoByOrderCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select o.client_code,o.client_name, o.client_mobile, o.card_type,o.card_number, o.client_type,o.client_birthday, o.client_sex,
+    o.client_age,o.remarks, o.ticket_state from order_client o
+    where o.order_code = #{order_code} order by o.id asc
+  </select>
+
+  <select id="selectDtoByGroupCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select o.client_code,o.client_name, o.client_mobile, o.card_type,o.card_number, o.client_type,o.client_birthday, o.client_sex,
+    o.client_age,o.remarks, o.ticket_state from order_client o
+    where o.group_code = #{group_code} order by o.order_code asc
+  </select>
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.OrderClient" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="client_code" property="client_code" jdbcType="VARCHAR" />
+    <result column="order_code" property="order_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="client_name" property="client_name" jdbcType="VARCHAR" />
+    <result column="client_mobile" property="client_mobile" jdbcType="VARCHAR" />
+    <result column="card_type" property="card_type" jdbcType="INTEGER" />
+    <result column="card_number" property="card_number" jdbcType="VARCHAR" />
+    <result column="client_type" property="client_type" jdbcType="INTEGER" />
+    <result column="client_birthday" property="client_birthday" jdbcType="DATE" />
+    <result column="client_sex" property="client_sex" jdbcType="INTEGER" />
+    <result column="client_age" property="client_age" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="ticket_state" property="ticket_state" jdbcType="INTEGER" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, client_code,order_code, group_code, client_name, client_mobile, card_type, card_number, client_type,
+    client_birthday, client_sex, client_age,remarks, ticket_state, create_time, update_time, creator_id,
+    creator_name
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from order_client
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByClientCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from order_client
+    where client_code = #{client_code}
+  </select>
+
+  <select id="selectByClientCodeAndGroupCode" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from order_client
+    where client_code = #{client_code} and group_code=#{group_code}
+  </select>
+
+
+  <select id="selectByClientCodeAndOrderCode" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from order_client
+    where client_code = #{client_code} and order_code=#{order_code}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from order_client
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+
+  <delete id="deleteByOrderCode" parameterType="java.lang.String" >
+    delete from order_client
+    where order_code = #{order_code}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from order_client
+    where order_code in (select o.order_code from route_order o where o.product_code=#{product_code})
+  </delete>
+
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String" >
+    delete from order_client
+    where order_code  in (select ro.order_code from route_order ro where ro.company_code=#{company_code})
+  </delete>
+
+  <delete id="deleteByOrderCodeAndClientCode" >
+    delete from order_client
+    where order_code = #{order_code} and client_code not in
+    <foreach collection="client_codes" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <delete id="deleteByGroupCodeList" >
+    delete from order_client
+    where group_code in
+    <foreach collection="group_code_list" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.OrderClient" useGeneratedKeys="true" keyProperty="id">
+    insert into order_client
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="client_code != null" >
+        client_code,
+      </if>
+      <if test="order_code != null" >
+        order_code,
+      </if>
+      <if test="group_code != null" >
+        group_code,
+      </if>
+      <if test="client_name != null" >
+        client_name,
+      </if>
+      <if test="client_mobile != null" >
+        client_mobile,
+      </if>
+      <if test="card_type != null" >
+        card_type,
+      </if>
+      <if test="card_number != null" >
+        card_number,
+      </if>
+      <if test="client_type != null" >
+        client_type,
+      </if>
+      <if test="client_birthday != null" >
+        client_birthday,
+      </if>
+      <if test="client_sex != null" >
+        client_sex,
+      </if>
+      <if test="client_age != null" >
+        client_age,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="ticket_state != null" >
+        ticket_state,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="client_code != null" >
+        #{client_code,jdbcType=VARCHAR},
+      </if>
+      <if test="order_code != null" >
+        #{order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="client_name != null" >
+        #{client_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_mobile != null" >
+        #{client_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="card_type != null" >
+        #{card_type,jdbcType=INTEGER},
+      </if>
+      <if test="card_number != null" >
+        #{card_number,jdbcType=VARCHAR},
+      </if>
+      <if test="client_type != null" >
+        #{client_type,jdbcType=INTEGER},
+      </if>
+      <if test="client_birthday != null" >
+        #{client_birthday,jdbcType=DATE},
+      </if>
+      <if test="client_sex != null" >
+        #{client_sex,jdbcType=INTEGER},
+      </if>
+      <if test="client_age != null" >
+        #{client_age,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="ticket_state != null" >
+        #{ticket_state,jdbcType=INTEGER},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.OrderClient" >
+    update order_client
+    <set >
+      <if test="client_code != null" >
+        client_code = #{client_code,jdbcType=VARCHAR},
+      </if>
+      <if test="order_code != null" >
+        order_code = #{order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        group_code = #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="client_name != null" >
+        client_name = #{client_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_mobile != null" >
+        client_mobile = #{client_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="card_type != null" >
+        card_type = #{card_type,jdbcType=INTEGER},
+      </if>
+      <if test="card_number != null" >
+        card_number = #{card_number,jdbcType=VARCHAR},
+      </if>
+      <if test="client_type != null" >
+        client_type = #{client_type,jdbcType=INTEGER},
+      </if>
+      <if test="client_birthday != null" >
+        client_birthday = #{client_birthday,jdbcType=DATE},
+      </if>
+      <if test="client_sex != null" >
+        client_sex = #{client_sex,jdbcType=INTEGER},
+      </if>
+      <if test="client_age != null" >
+        client_age = #{client_age,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="ticket_state != null" >
+        ticket_state = #{ticket_state,jdbcType=INTEGER},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateTrafficStatus" parameterType="com.kunlun.erp.core.dto.routeOrder.OrderClientDto" >
+     update order_client set ticket_state = #{ticket_state} where client_code=#{client_code}
+  </update>
+</mapper>

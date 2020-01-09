@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.SysCountyMapper" >
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.area.CountyDto" >
+    <id column="county_id" property="county_id" jdbcType="INTEGER" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="first_letter" property="first_letter" jdbcType="VARCHAR" />
+    <result column="zh_name" property="zh_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="selectListDto" parameterType="java.lang.Integer" resultMap="DtoResultMap" >
+    select county_id,city_id,zh_name,first_letter from sys_county where 1=1
+     <if test="city_id = null">
+       and city_id=#{city_id}
+     </if>
+     order by first_letter asc
+  </select>
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.SysCounty" >
+    <constructor >
+      <idArg column="county_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="city_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="zh_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="en_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="first_letter" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="order_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="state" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="create_person" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_person" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    county_id, city_id, zh_name, en_name, first_letter, order_id, state, create_time, 
+    create_person, update_time, update_person
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sys_county
+    where county_id = #{county_id,jdbcType=INTEGER}
+  </select>
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.SysCounty" >
+    insert into sys_county
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="county_id != null" >
+        county_id,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="zh_name != null" >
+        zh_name,
+      </if>
+      <if test="en_name != null" >
+        en_name,
+      </if>
+      <if test="first_letter != null" >
+        first_letter,
+      </if>
+      <if test="order_id != null" >
+        order_id,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="create_person != null" >
+        create_person,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="update_person != null" >
+        update_person,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="county_id != null" >
+        #{county_id,jdbcType=INTEGER},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="zh_name != null" >
+        #{zh_name,jdbcType=VARCHAR},
+      </if>
+      <if test="en_name != null" >
+        #{en_name,jdbcType=VARCHAR},
+      </if>
+      <if test="first_letter != null" >
+        #{first_letter,jdbcType=VARCHAR},
+      </if>
+      <if test="order_id != null" >
+        #{order_id,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="create_person != null" >
+        #{create_person,jdbcType=VARCHAR},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_person != null" >
+        #{update_person,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

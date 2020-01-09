@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kunlun.erp.core.mapper.PersonInfoMapper">
+
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.person.PersonDto">
+    <result column="person_code" property="person_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_type" property="person_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="person_name" property="person_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_mobile" property="person_mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_wechat" property="person_wechat" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_phone" property="person_phone" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_qq" property="person_qq" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="position" property="position" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="remarks" property="remarks" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="creator_name" property="creator_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <resultMap id="LikePersonResultMap" type="com.kunlun.erp.core.dto.person.LikeSearchPersonDto">
+    <result column="person_code" property="person_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_name" property="person_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_mobile" property="person_mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_phone" property="person_phone" javaType="java.lang.String" jdbcType="VARCHAR" />
+
+  </resultMap>
+
+  <select id="selectLikePerson" parameterType="com.kunlun.erp.core.dto.condition.PersonCondition" resultMap="LikePersonResultMap">
+    select person_code, person_name, person_mobile,person_phone from person_info where 1=1
+    <if test="person_name !=null and person_name!=''">
+      <if test="person_name_like ==true">
+        and person_name like concat('%',#{person_name},'%')
+      </if>
+      <if test="person_name_like ==false">
+        and person_name = #{person_name}
+      </if>
+    </if>
+    <if test="company_code != null and company_code !=''">
+      and company_code = #{company_code}
+    </if>
+    <if test="person_type != null">
+      and person_type = #{person_type}
+    </if>
+    order by person_name asc
+  </select>
+
+  <select id="selectDtoByPersonCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select person_code, person_type, person_name, person_mobile, person_wechat, person_phone, person_qq, position,remarks,creator_name
+    from person_info
+    where person_code = #{person_code}
+  </select>
+
+  <select id="selectDtoByCondition" parameterType="com.kunlun.erp.core.dto.condition.PersonCondition" resultMap="DtoResultMap">
+    select person_code, person_type, person_name, person_mobile, person_wechat, person_phone, person_qq, position,remarks,creator_name
+    from person_info
+    where company_code = #{company_code}
+    <if test="person_type != null ">
+      and person_type = #{person_type}
+    </if>
+    <if test="person_name != null and person_name != '' ">
+      <choose>
+        <when test="person_name_like == true">
+          and person_name like concat('%',#{person_name},'%')
+        </when>
+        <otherwise>
+          and person_name = #{person_name}
+        </otherwise>
+      </choose>
+    </if>
+    <if test="person_mobile != null and person_mobile != '' ">
+      and person_mobile =  #{person_mobile}
+    </if>
+    order by id desc
+  </select>
+
+  <select id="deleteByCondition" parameterType="com.kunlun.erp.core.dto.condition.PersonCondition">
+    delete from person_info where company_code= #{company_code}
+    <if test="person_codes != null and person_codes.size() > 0">
+      <if test="person_code_include ==true">
+        and person_code in
+        <foreach collection="person_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+      <if test="person_code_include ==false">
+        and person_code not in
+        <foreach collection="person_codes" item="code" index="index" open="(" separator="," close=")">
+          #{code}
+        </foreach>
+      </if>
+    </if>
+  </select>
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.PersonInfo">
+    <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="company_code" property="company_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_code" property="person_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_type" property="person_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="person_name" property="person_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_mobile" property="person_mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_wechat" property="person_wechat" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_phone" property="person_phone" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="person_qq" property="person_qq" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="position" property="position" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="remarks" property="remarks" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, company_code, person_code, person_type, person_name, person_mobile, person_wechat,
+    person_phone, person_qq, position, remarks, create_time, update_time, creator_id,creator_name
+  </sql>
+
+  <select id="selectByPersonCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from person_info
+    where person_code = #{person_code,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from person_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.PersonInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into person_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="company_code != null">
+        company_code,
+      </if>
+      <if test="person_code != null">
+        person_code,
+      </if>
+      <if test="person_type != null">
+        person_type,
+      </if>
+      <if test="person_name != null">
+        person_name,
+      </if>
+      <if test="person_mobile != null">
+        person_mobile,
+      </if>
+      <if test="person_wechat != null">
+        person_wechat,
+      </if>
+      <if test="person_phone != null">
+        person_phone,
+      </if>
+      <if test="person_qq != null">
+        person_qq,
+      </if>
+      <if test="position != null">
+        position,
+      </if>
+      <if test="remarks != null">
+        remarks,
+      </if>
+      <if test="create_time != null">
+        create_time,
+      </if>
+      <if test="update_time != null">
+        update_time,
+      </if>
+      <if test="creator_id != null">
+        creator_id,
+      </if>
+      <if test="creator_name != null">
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="company_code != null">
+        #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_code != null">
+        #{person_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_type != null">
+        #{person_type,jdbcType=INTEGER},
+      </if>
+      <if test="person_name != null">
+        #{person_name,jdbcType=VARCHAR},
+      </if>
+      <if test="person_mobile != null">
+        #{person_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="person_wechat != null">
+        #{person_wechat,jdbcType=VARCHAR},
+      </if>
+      <if test="person_phone != null">
+        #{person_phone,jdbcType=VARCHAR},
+      </if>
+      <if test="person_qq != null">
+        #{person_qq,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null">
+        #{position,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null">
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null">
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null">
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null">
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null">
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.PersonInfo">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Dec 02 17:45:07 CST 2019.
+    -->
+    update person_info
+    <set>
+      <if test="company_code != null">
+        company_code = #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_code != null">
+        person_code = #{person_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_type != null">
+        person_type = #{person_type,jdbcType=INTEGER},
+      </if>
+      <if test="person_name != null">
+        person_name = #{person_name,jdbcType=VARCHAR},
+      </if>
+      <if test="person_mobile != null">
+        person_mobile = #{person_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="person_wechat != null">
+        person_wechat = #{person_wechat,jdbcType=VARCHAR},
+      </if>
+      <if test="person_phone != null">
+        person_phone = #{person_phone,jdbcType=VARCHAR},
+      </if>
+      <if test="person_qq != null">
+        person_qq = #{person_qq,jdbcType=VARCHAR},
+      </if>
+      <if test="position != null">
+        position = #{position,jdbcType=VARCHAR},
+      </if>
+      <if test="remarks != null">
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null">
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null">
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null">
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null">
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from person_info where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String">
+        delete from person_info where company_code = #{company_code,jdbcType=VARCHAR}
+    </delete>
+</mapper>

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RouteMealMapper" >
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.routeHall.RouteMealDto" >
+    <result column="meal_code" property="meal_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="person_code" property="person_code" jdbcType="VARCHAR" />
+    <result column="person_name" property="person_name" jdbcType="VARCHAR" />
+    <result column="person_mobile" property="person_mobile" jdbcType="VARCHAR" />
+    <result column="meal_type" property="meal_type" jdbcType="INTEGER" />
+    <result column="meal_date" property="meal_date" jdbcType="DATE" />
+    <result column="currency" property="currency" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="diners_count" property="diners_count" jdbcType="INTEGER" />
+    <result column="free_count" property="free_count" jdbcType="INTEGER" />
+    <result column="fee_total" property="fee_total" jdbcType="DECIMAL" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectDtoByGroupCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select r.meal_code, r.company_code, get_company_name(r.company_code) as company_name, r.person_code,p.person_name as person_name, p.person_mobile as person_mobile,r.meal_type, r.meal_date,
+    r.currency, r.fee, r.diners_count,r.free_count,r.fee_total, r.remarks from route_meal r left join person_info p on p.person_code = r.person_code
+    where r.group_code = #{group_code} order by r.id asc
+  </select>
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RouteMeal" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="meal_code" property="meal_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="person_code" property="person_code" jdbcType="VARCHAR" />
+    <result column="meal_type" property="meal_type" jdbcType="INTEGER" />
+    <result column="meal_date" property="meal_date" jdbcType="DATE" />
+    <result column="currency" property="currency" jdbcType="VARCHAR" />
+    <result column="fee" property="fee" jdbcType="DECIMAL" />
+    <result column="diners_count" property="diners_count" jdbcType="INTEGER" />
+    <result column="free_count" property="free_count" jdbcType="INTEGER" />
+    <result column="fee_total" property="fee_total" jdbcType="DECIMAL" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, meal_code, group_code, company_code, person_code, meal_type, meal_date, currency,
+    fee, diners_count, free_count, fee_total, remarks, create_time, update_time, creator_id, 
+    creator_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from route_meal
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByMealCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_meal
+    where meal_code = #{meal_code}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+
+    delete from route_meal
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+
+  <delete id="deleteByGroupCode" parameterType="java.lang.String" >
+    delete from route_meal
+    where group_code = #{group_code}
+  </delete>
+
+  <delete id="deleteByGroupCodeList" parameterType="java.lang.String" >
+    delete from route_meal
+    where group_code in
+    <foreach collection="group_code_list" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String" >
+    delete from route_meal
+    where company_code = #{company_code}
+  </delete>
+
+  <delete id="deleteByGroupCodeAndMealCode" >
+    delete from route_meal
+    where group_code = #{group_code} and meal_code not in
+    <foreach collection="meal_codes" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RouteMeal" useGeneratedKeys="true" keyProperty="id" >
+    insert into route_meal
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="meal_code != null" >
+        meal_code,
+      </if>
+      <if test="group_code != null" >
+        group_code,
+      </if>
+      <if test="company_code != null" >
+        company_code,
+      </if>
+      <if test="person_code != null" >
+        person_code,
+      </if>
+      <if test="meal_type != null" >
+        meal_type,
+      </if>
+      <if test="meal_date != null" >
+        meal_date,
+      </if>
+      <if test="currency != null" >
+        currency,
+      </if>
+      <if test="fee != null" >
+        fee,
+      </if>
+      <if test="diners_count != null" >
+        diners_count,
+      </if>
+      <if test="free_count != null" >
+        free_count,
+      </if>
+      <if test="fee_total != null" >
+        fee_total,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="meal_code != null" >
+        #{meal_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_code != null" >
+        #{person_code,jdbcType=VARCHAR},
+      </if>
+      <if test="meal_type != null" >
+        #{meal_type,jdbcType=INTEGER},
+      </if>
+      <if test="meal_date != null" >
+        #{meal_date,jdbcType=DATE},
+      </if>
+      <if test="currency != null" >
+        #{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="diners_count != null" >
+        #{diners_count,jdbcType=INTEGER},
+      </if>
+      <if test="free_count != null" >
+        #{free_count,jdbcType=INTEGER},
+      </if>
+      <if test="fee_total != null" >
+        #{fee_total,jdbcType=DECIMAL},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RouteMeal" >
+    update route_meal
+    <set >
+      <if test="meal_code != null" >
+        meal_code = #{meal_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        group_code = #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        company_code = #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="person_code != null" >
+        person_code = #{person_code,jdbcType=VARCHAR},
+      </if>
+      <if test="meal_type != null" >
+        meal_type = #{meal_type,jdbcType=INTEGER},
+      </if>
+      <if test="meal_date != null" >
+        meal_date = #{meal_date,jdbcType=DATE},
+      </if>
+      <if test="currency != null" >
+        currency = #{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="fee != null" >
+        fee = #{fee,jdbcType=DECIMAL},
+      </if>
+      <if test="diners_count != null" >
+        diners_count = #{diners_count,jdbcType=INTEGER},
+      </if>
+      <if test="free_count != null" >
+        free_count = #{free_count,jdbcType=INTEGER},
+      </if>
+      <if test="fee_total != null" >
+        fee_total = #{fee_total,jdbcType=DECIMAL},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,36 @@
+客户端请求
+
+{
+	"header":{
+		"trans_no":"4000001844050655",
+		"secret_key":"ef2d1831daf5144f0992237b45e5c0b2" //从服务端获取
+	},
+	"body":{
+		"key1":val1,
+		"key2":"val2"
+	}
+
+}
+
+
+服务端响应
+
+{
+	"header":{
+	    "trans_no":"4000001844050655",
+		"state":"success",
+		"error_message":{
+
+		    }
+	},
+	"body":{
+		"key1":val1,
+		"key2":"val2"
+	}
+
+}
+
+
+
+
+

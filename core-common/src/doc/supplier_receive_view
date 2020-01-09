@@ -1,0 +1,102 @@
+select
+guide.guide_code as trade_code,guide.group_code,guide.company_code,company.company_name,company.settlement_mode,
+guide.fee_total as amount_payable,
+get_payment_by_tradeno(guide.guide_code,company.company_code) as amount_paid,
+(guide.fee_total - get_payment_by_tradeno(guide.guide_code,company.company_code)) as amount_not_pay
+from route_guides guide
+left join company_info company on company.company_code=guide.company_code
+where guide.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+UNION ALL
+select
+traffic.traffic_code as trade_code,traffic.group_code,traffic.company_code,company.company_name,company.settlement_mode,
+traffic.fee_total as amount_payable,
+get_payment_by_tradeno(traffic.traffic_code,company.company_code) as amount_paid,
+(traffic.fee_total - get_payment_by_tradeno(traffic.traffic_code,company.company_code)) as amount_not_pay
+from route_traffic traffic
+left join company_info company on company.company_code=traffic.company_code
+where traffic.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+UNION ALL
+select
+reside.reside_code as trade_code,reside.group_code,reside.company_code,company.company_name,company.settlement_mode,
+reside.fee_total as amount_payable,
+get_payment_by_tradeno(reside.reside_code,company.company_code) as amount_paid,
+(reside.fee_total - get_payment_by_tradeno(reside.reside_code,company.company_code)) as amount_not_pay
+from route_reside reside
+left join company_info company on company.company_code=reside.company_code
+where reside.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+UNION ALL
+select
+ticket.ticket_code as trade_code,ticket.group_code,ticket.company_code,company.company_name,company.settlement_mode,
+ticket.fee_total as amount_payable,
+get_payment_by_tradeno(ticket.ticket_code,company.company_code) as amount_paid,
+(ticket.fee_total - get_payment_by_tradeno(ticket.ticket_code,company.company_code)) as amount_not_pay
+from route_ticket ticket
+left join company_info company on company.company_code=ticket.company_code
+where ticket.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+
+UNION ALL
+select
+meal.meal_code as trade_code,meal.group_code,meal.company_code,company.company_name,company.settlement_mode,
+meal.fee_total as amount_payable,
+get_payment_by_tradeno(meal.meal_code,company.company_code) as amount_paid,
+(meal.fee_total - get_payment_by_tradeno(meal.meal_code,company.company_code)) as amount_not_pay
+from route_meal meal
+left join company_info company on company.company_code=meal.company_code
+where meal.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+
+UNION ALL
+select
+motorcade.motorcade_code as trade_code,motorcade.group_code,motorcade.company_code,company.company_name,company.settlement_mode,
+motorcade.fee_total as amount_payable,
+get_payment_by_tradeno(motorcade.motorcade_code,company.company_code) as amount_paid,
+(motorcade.fee_total - get_payment_by_tradeno(motorcade.motorcade_code,company.company_code)) as amount_not_pay
+from route_motorcade motorcade
+left join company_info company on company.company_code=motorcade.company_code
+where motorcade.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+
+UNION ALL
+select
+insurance.insurance_code as trade_code,insurance.group_code,insurance.company_code,company.company_name,company.settlement_mode,
+insurance.fee_total as amount_payable,
+get_payment_by_tradeno(insurance.insurance_code,company.company_code) as amount_paid,
+(insurance.fee_total - get_payment_by_tradeno(insurance.insurance_code,company.company_code)) as amount_not_pay
+from route_insurance insurance
+left join company_info company on company.company_code=insurance.company_code
+where insurance.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+
+UNION ALL
+select
+travel.income_code as trade_code,travel.group_code,travel.company_code,company.company_name,company.settlement_mode,
+travel.total_price as amount_payable,
+get_payment_by_tradeno(travel.income_code,company.company_code) as amount_paid,
+(travel.total_price - get_payment_by_tradeno(travel.income_code,company.company_code)) as amount_not_pay
+from route_travel_agency_income travel
+left join company_info company on company.company_code=travel.company_code
+where travel.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)
+UNION ALL
+select
+other.other_code as trade_code,other.group_code,other.company_code,company.company_name,company.settlement_mode,
+other.total as amount_payable,
+get_payment_by_tradeno(other.other_code,company.company_code) as amount_paid,
+(other.total - get_payment_by_tradeno(other.other_code,company.company_code)) as amount_not_pay
+from (select sum(r.fee_total) as total,r.* from route_other r group by r.group_code,r.company_code order by r.group_code asc) as other
+left join company_info company on company.company_code=other.company_code
+where other.group_code  in (
+	select hall.group_code from route_hall hall  where  hall.status < 3 and unix_timestamp(disband_date) <  unix_timestamp(NOW()) and hall.approve_state=1
+)

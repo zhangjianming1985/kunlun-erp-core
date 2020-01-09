@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RoutePricePlanDetailMapper" >
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.product.RoutePricePlanDetailDto" >
+    <result column="price_plan_code" property="price_plan_code" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="adult_trade_price" property="adult_trade_price" jdbcType="DECIMAL" />
+    <result column="children_trade_price" property="children_trade_price" jdbcType="DECIMAL" />
+    <result column="adult_sales_price" property="adult_sales_price" jdbcType="DECIMAL" />
+    <result column="children_sales_price" property="children_sales_price" jdbcType="DECIMAL" />
+    <result column="room_diff_price" property="room_diff_price" jdbcType="DECIMAL" />
+    <result column="inventory" property="inventory" jdbcType="INTEGER" />
+    <result column="cost_price" property="cost_price" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <sql id="Dto_Column_List" >
+    price_plan_code,departure_date, adult_trade_price, children_trade_price,
+    adult_sales_price, children_sales_price, room_diff_price, inventory, cost_price
+  </sql>
+
+  <select id="selectDtoByPricePlanCode" parameterType="java.lang.String" resultMap="DtoResultMap">
+    select <include refid="Dto_Column_List" />
+    from route_price_plan_detail
+    where price_plan_code = #{price_plan_code,jdbcType=VARCHAR}
+  </select>
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RoutePricePlanDetail" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="price_code" property="price_code" jdbcType="VARCHAR" />
+    <result column="product_code" property="product_code" jdbcType="VARCHAR" />
+    <result column="route_code" property="route_code" jdbcType="VARCHAR" />
+    <result column="route_plan_code" property="route_plan_code" jdbcType="VARCHAR" />
+    <result column="price_plan_code" property="price_plan_code" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="adult_trade_price" property="adult_trade_price" jdbcType="DECIMAL" />
+    <result column="children_trade_price" property="children_trade_price" jdbcType="DECIMAL" />
+    <result column="adult_sales_price" property="adult_sales_price" jdbcType="DECIMAL" />
+    <result column="children_sales_price" property="children_sales_price" jdbcType="DECIMAL" />
+    <result column="room_diff_price" property="room_diff_price" jdbcType="DECIMAL" />
+    <result column="inventory" property="inventory" jdbcType="INTEGER" />
+    <result column="cost_price" property="cost_price" jdbcType="DECIMAL" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id,price_code,product_code, route_code,route_plan_code, price_plan_code, departure_date, adult_trade_price, children_trade_price,
+    adult_sales_price, children_sales_price, room_diff_price, inventory, cost_price, 
+    create_time, update_time, creator_id, creator_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from route_price_plan_detail
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByPricePlanCode" resultType="java.lang.String">
+    select price_code from route_price_plan_detail
+    where price_plan_code = #{price_plan_code}
+  </select>
+
+  <select id="selectPriceCodeByPricePlanCodeAndDate" resultType="java.lang.String">
+    select price_code from route_price_plan_detail
+    where price_plan_code = #{price_plan_code} and departure_date in
+    <foreach collection="departure_date" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </select>
+
+
+  <select id="selectPriceCodeByRoutePlan" resultType="java.lang.String" parameterType="java.lang.String">
+    select price_code from route_price_plan_detail
+    where route_plan_code  in
+    <foreach collection="route_plan_list" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </select>
+
+
+  <select id="selectByPricePlanCodeAndDate" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from route_price_plan_detail
+    where price_plan_code = #{price_plan_code} and departure_date = #{departure_date}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from route_price_plan_detail
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByPricePlanCode" parameterType="java.lang.String" >
+    delete from route_price_plan_detail
+    where price_plan_code = #{price_plan_code,jdbcType=VARCHAR}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from route_price_plan_detail
+    where product_code = #{product_code,jdbcType=VARCHAR}
+  </delete>
+
+
+  <delete id="deleteByPricePlanCodeAndDate" >
+    delete from route_price_plan_detail
+    where price_plan_code = #{price_plan_code} and departure_date in
+    <foreach collection="departure_date" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </delete>
+
+  <delete id="deleteByRoutePlan" parameterType="java.lang.String"  >
+    delete from route_price_plan_detail
+    where route_plan_code  in
+    <foreach collection="route_plan_list" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </delete>
+
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RoutePricePlanDetail" useGeneratedKeys="true" keyProperty="id">
+    insert into route_price_plan_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="price_code != null" >
+        price_code,
+      </if>
+      <if test="product_code != null" >
+        product_code,
+      </if>
+      <if test="route_code != null" >
+        route_code,
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code,
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code,
+      </if>
+      <if test="departure_date != null" >
+        departure_date,
+      </if>
+      <if test="adult_trade_price != null" >
+        adult_trade_price,
+      </if>
+      <if test="children_trade_price != null" >
+        children_trade_price,
+      </if>
+      <if test="adult_sales_price != null" >
+        adult_sales_price,
+      </if>
+      <if test="children_sales_price != null" >
+        children_sales_price,
+      </if>
+      <if test="room_diff_price != null" >
+        room_diff_price,
+      </if>
+      <if test="inventory != null" >
+        inventory,
+      </if>
+      <if test="cost_price != null" >
+        cost_price,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="price_code != null" >
+        #{price_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_code != null" >
+        #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_code != null" >
+        #{route_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="departure_date != null" >
+        #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="adult_trade_price != null" >
+        #{adult_trade_price,jdbcType=DECIMAL},
+      </if>
+      <if test="children_trade_price != null" >
+        #{children_trade_price,jdbcType=DECIMAL},
+      </if>
+      <if test="adult_sales_price != null" >
+        #{adult_sales_price,jdbcType=DECIMAL},
+      </if>
+      <if test="children_sales_price != null" >
+        #{children_sales_price,jdbcType=DECIMAL},
+      </if>
+      <if test="room_diff_price != null" >
+        #{room_diff_price,jdbcType=DECIMAL},
+      </if>
+      <if test="inventory != null" >
+        #{inventory,jdbcType=INTEGER},
+      </if>
+      <if test="cost_price != null" >
+        #{cost_price,jdbcType=DECIMAL},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RoutePricePlanDetail" >
+    update route_price_plan_detail
+    <set >
+      <if test="price_code != null" >
+        price_code = #{price_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_code != null" >
+        product_code = #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_code != null" >
+        route_code = #{route_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code = #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code = #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="departure_date != null" >
+        departure_date = #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="adult_trade_price != null" >
+        adult_trade_price = #{adult_trade_price,jdbcType=DECIMAL},
+      </if>
+      <if test="children_trade_price != null" >
+        children_trade_price = #{children_trade_price,jdbcType=DECIMAL},
+      </if>
+      <if test="adult_sales_price != null" >
+        adult_sales_price = #{adult_sales_price,jdbcType=DECIMAL},
+      </if>
+      <if test="children_sales_price != null" >
+        children_sales_price = #{children_sales_price,jdbcType=DECIMAL},
+      </if>
+      <if test="room_diff_price != null" >
+        room_diff_price = #{room_diff_price,jdbcType=DECIMAL},
+      </if>
+      <if test="inventory != null" >
+        inventory = #{inventory,jdbcType=INTEGER},
+      </if>
+      <if test="cost_price != null" >
+        cost_price = #{cost_price,jdbcType=DECIMAL},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

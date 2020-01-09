@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.ProductInfoMapper" >
+
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.product.response.RouteProductListDto" >
+    <result column="product_code" property="product_code" jdbcType="VARCHAR" />
+    <result column="product_name" property="product_name" jdbcType="VARCHAR" />
+    <result column="product_category_name" property="product_category_name" jdbcType="VARCHAR" />
+    <result column="area_text" property="area_text" jdbcType="VARCHAR" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="countByProductName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from product_info where product_name  = #{product_name}
+  </select>
+
+  <select id="countByProductCategoryCode" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from product_info where product_category_code  = #{product_category_code}
+  </select>
+
+  <select id="selectByCondition" parameterType="com.kunlun.erp.core.dto.condition.ProductCondition" resultMap="DtoResultMap">
+    select p.product_code,p.product_name,pc.category_name as product_category_name,
+    concat(IFNULL(p.country_name,'-'),'/',IFNULL(p.district_name,'-'),'/',IFNULL(p.province_name,'-'),'/',IFNULL(p.city_name,'-'),'/',IFNULL(p.county_name,'-'))  as area_text,
+    p.creator_name
+    from product_info p left join product_category pc on p.product_category_code=pc.category_code
+    where 1=1
+    <if test="product_code != null and product_code!=''">
+      and p.product_code = #{product_code}
+    </if>
+    <if test="product_name != null and product_name!=''">
+      and p.product_name like concat('%',#{product_name},'%')
+    </if>
+    <if test="creator_name != null and creator_name!=''">
+      and p.creator_name like concat('%',#{creator_name},'%')
+    </if>
+    <if test="country_id != null">
+      and p.country_id = #{country_id}
+    </if>
+    <if test="district_id != null">
+      and p.district_id = #{district_id}
+    </if>
+    <if test="province_id != null">
+      and p.province_id = #{province_id}
+    </if>
+    <if test="city_id != null">
+      and p.city_id = #{city_id}
+    </if>
+    <if test="county_id != null">
+      and p.county_id = #{county_id}
+    </if>
+    order by p.id desc
+  </select>
+
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.ProductInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="product_code" property="product_code" jdbcType="VARCHAR" />
+    <result column="product_name" property="product_name" jdbcType="VARCHAR" />
+    <result column="product_description" property="product_description" jdbcType="VARCHAR" />
+    <result column="product_category_code" property="product_category_code" jdbcType="VARCHAR" />
+    <result column="country_id" property="country_id" jdbcType="INTEGER" />
+    <result column="country_name" property="country_name" jdbcType="VARCHAR" />
+    <result column="district_id" property="district_id" jdbcType="INTEGER" />
+    <result column="district_name" property="district_name" jdbcType="VARCHAR" />
+    <result column="province_id" property="province_id" jdbcType="INTEGER" />
+    <result column="province_name" property="province_name" jdbcType="VARCHAR" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="city_name" property="city_name" jdbcType="VARCHAR" />
+    <result column="county_id" property="county_id" jdbcType="INTEGER" />
+    <result column="county_name" property="county_name" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, product_code, product_name, product_description,product_category_code, country_id, country_name, district_id,
+    district_name, province_id, province_name, city_id, city_name, county_id, county_name, 
+    create_time, update_time, creator_id, creator_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from product_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByProductCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from product_info
+    where product_code = #{product_code,jdbcType=VARCHAR}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from product_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from product_info
+    where product_code = #{product_code,jdbcType=VARCHAR}
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.ProductInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into product_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="product_code != null" >
+        product_code,
+      </if>
+      <if test="product_name != null" >
+        product_name,
+      </if>
+      <if test="product_description != null" >
+        product_description,
+      </if>
+      <if test="product_category_code != null" >
+        product_category_code,
+      </if>
+      <if test="country_id != null" >
+        country_id,
+      </if>
+      <if test="country_name != null" >
+        country_name,
+      </if>
+      <if test="district_id != null" >
+        district_id,
+      </if>
+      <if test="district_name != null" >
+        district_name,
+      </if>
+      <if test="province_id != null" >
+        province_id,
+      </if>
+      <if test="province_name != null" >
+        province_name,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="city_name != null" >
+        city_name,
+      </if>
+      <if test="county_id != null" >
+        county_id,
+      </if>
+      <if test="county_name != null" >
+        county_name,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="product_code != null" >
+        #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_name != null" >
+        #{product_name,jdbcType=VARCHAR},
+      </if>
+      <if test="product_description != null" >
+        #{product_description,jdbcType=VARCHAR},
+      </if>
+      <if test="product_category_code != null" >
+        #{product_category_code,jdbcType=VARCHAR},
+      </if>
+      <if test="country_id != null" >
+        #{country_id,jdbcType=INTEGER},
+      </if>
+      <if test="country_name != null" >
+        #{country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="district_id != null" >
+        #{district_id,jdbcType=INTEGER},
+      </if>
+      <if test="district_name != null" >
+        #{district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="province_id != null" >
+        #{province_id,jdbcType=INTEGER},
+      </if>
+      <if test="province_name != null" >
+        #{province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="city_name != null" >
+        #{city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="county_id != null" >
+        #{county_id,jdbcType=INTEGER},
+      </if>
+      <if test="county_name != null" >
+        #{county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.ProductInfo" >
+    update product_info
+    <set >
+      <if test="product_code != null" >
+        product_code = #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_name != null" >
+        product_name = #{product_name,jdbcType=VARCHAR},
+      </if>
+      <if test="product_description != null" >
+        product_description = #{product_description,jdbcType=VARCHAR},
+      </if>
+      <if test="product_category_code != null" >
+        product_category_code = #{product_category_code,jdbcType=VARCHAR},
+      </if>
+      <if test="country_id != null" >
+        country_id = #{country_id,jdbcType=INTEGER},
+      </if>
+      <if test="country_name != null" >
+        country_name = #{country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="district_id != null" >
+        district_id = #{district_id,jdbcType=INTEGER},
+      </if>
+      <if test="district_name != null" >
+        district_name = #{district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="province_id != null" >
+        province_id = #{province_id,jdbcType=INTEGER},
+      </if>
+      <if test="province_name != null" >
+        province_name = #{province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null" >
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="city_name != null" >
+        city_name = #{city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="county_id != null" >
+        county_id = #{county_id,jdbcType=INTEGER},
+      </if>
+      <if test="county_name != null" >
+        county_name = #{county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

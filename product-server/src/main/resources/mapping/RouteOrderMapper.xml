@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RouteOrderMapper" >
+  <resultMap id="CollectDtoResultMap" type="com.kunlun.erp.core.dto.finance.CollectedDto" >
+    <result column="order_code" property="order_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="settlement_mode" property="settlement_mode" jdbcType="INTEGER" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="collect_amount" property="collect_amount" jdbcType="DECIMAL" />
+    <result column="collected_amount" property="collected_amount" jdbcType="DECIMAL" />
+    <result column="remaining_amount" property="remaining_amount" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <select id="selectCollectDtoByCondition" parameterType="com.kunlun.erp.core.dto.finance.request.CollectedListReqDto" resultMap="CollectDtoResultMap">
+    select o.order_code,o.company_code,c.company_name,c.settlement_mode,o.group_code,
+    get_order_amount(o.order_code) as collect_amount,
+    get_receivable_by_ordernumber(o.order_code) as collected_amount,
+    (get_order_amount(o.order_code) - get_receivable_by_ordernumber(o.order_code)) as remaining_amount
+    from route_order o
+    left join company_info c on o.company_code=c.company_code
+    left join route_hall hall on o.group_code = hall.group_code
+    where  hall.status <![CDATA[<]]> 3 and unix_timestamp(disband_date) <![CDATA[<]]>  unix_timestamp(NOW()) and hall.approve_state=1
+    <if test="company_name != null and company_name != '' ">
+      and c.company_name like concat('%',#{company_name},'%')
+    </if>
+    <if test="group_code != null and group_code!=''">
+      and o.group_code = #{group_code}
+    </if>
+    <if test="collected_state != null ">
+      <choose>
+        <when test="collected_state==0">
+          and get_receivable_by_ordernumber(o.order_code) <![CDATA[<=]]> 0
+        </when>
+        <otherwise>
+          and get_order_amount(o.order_code)=get_receivable_by_ordernumber(o.order_code)
+        </otherwise>
+
+      </choose>
+    </if>
+    <if test="settlement_mode!= null">
+        and c.settlement_mode=#{settlement_mode}
+    </if>
+    <if test="departure_date_start != null and departure_date_start != ''">
+      and hall.departure_date <![CDATA[>=]]> #{departure_date_start}
+    </if>
+    <if test="departure_date_end != null and departure_date_end != ''">
+      and hall.departure_date <![CDATA[<=]]> #{departure_date_end}
+    </if>
+    <if test="order_list!=null and order_list.size()>0">
+      and o.order_code in
+      <foreach collection="order_list" item="code" index="index" open="(" separator="," close=")">
+        #{code}
+      </foreach>
+    </if>
+    order by o.create_time asc
+  </select>
+
+
+
+
+
+
+
+
+
+  <resultMap id="SalesChannelResultMap" type="com.kunlun.erp.core.dto.routeHall.SalesChannelDto" >
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="contact_name" property="contact_name" jdbcType="VARCHAR" />
+    <result column="contact_mobile" property="contact_mobile" jdbcType="VARCHAR" />
+    <result column="client_count" property="client_count" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="selectSalesChannelByOrderCode" resultMap="SalesChannelResultMap" parameterType="java.lang.String" >
+    select count(o.id) as client_count,c.company_name as company_name,p.person_name as contact_name ,p.person_mobile as contact_mobile
+    from route_order o
+    left join company_info c on c.company_code = o.company_code
+    left join person_info p on p.person_code = o.contact_code
+    where o.order_code = #{order_code}
+  </select>
+
+
+
+  <resultMap id="PeopleCountResultMap" type="com.kunlun.erp.core.dto.routeHall.PeopleCount" >
+    <result column="adult_count" property="adult_count" jdbcType="INTEGER" />
+    <result column="children_count" property="children_count" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="peopleCountByGroupCode" resultMap="PeopleCountResultMap" parameterType="java.lang.String" >
+    select count(adult_count) as adult_count, count(children_count) as children_count
+    from route_order
+    where group_code = #{group_code}
+  </select>
+
+  <resultMap id="RoomCountResultMap" type="com.kunlun.erp.core.dto.routeHall.RoomCount" >
+    <result column="hotel_level" property="hotel_level" jdbcType="VARCHAR" />
+    <result column="room_standard_count" property="room_standard_count" jdbcType="INTEGER" />
+    <result column="room_big_count" property="room_big_count" jdbcType="INTEGER" />
+    <result column="room_three_count" property="room_three_count" jdbcType="INTEGER" />
+    <result column="accompany_room_count" property="accompany_room_count" jdbcType="INTEGER" />
+    <result column="no_room_count" property="no_room_count" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="roomCountByGroupCode" resultMap="RoomCountResultMap" parameterType="java.lang.String" >
+    select group_concat(distinct(hotel_level)) as hotel_level, count(room_standard_count) as room_standard_count, count(room_big_count) as room_big_count,count(room_three_count) as room_three_count,
+    count(accompany_room_count) as accompany_room_count,count(no_room_count) as no_room_count
+    from route_order
+    where group_code = #{group_code}
+  </select>
+
+
+  <resultMap id="ListDtoResultMap" type="com.kunlun.erp.core.dto.routeOrder.OrderListDto" >
+    <result column="order_code" property="order_code" jdbcType="VARCHAR" />
+    <result column="product_name" property="product_name" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="adult_count" property="adult_count" jdbcType="INTEGER" />
+    <result column="children_count" property="children_count" jdbcType="INTEGER" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+  </resultMap>
+
+
+  <select id="selectListDtoByCondition" parameterType="com.kunlun.erp.core.dto.routeOrder.request.RouteOrderListReqDto" resultMap="ListDtoResultMap">
+    select o.order_code,p.product_name,hall.departure_date,o.adult_count,o.children_count,get_order_amount(o.order_code) as amount,
+    o.create_time,o.state
+    from route_order o
+    left join product_info p on o.product_code=p.product_code
+    left join route_hall hall on o.group_code = hall.group_code
+    <if test="leader_name != null and leader_name != '' ">
+      left join company_info compnay on o.company_code=compnay.company_code
+    </if>
+    <if test="(client_name !=null and client_name !='') or (client_mobile !=null and client_mobile!='')">
+      left join order_client oc on oc.order_code=o.order_code
+    </if>
+    <if test="contact_name != null and contact_name != '' ">
+      left join person_info pi on pi.person_code=o.contact_code
+    </if>
+    <if test="company_name != null and company_name != '' ">
+      left join company_info ci on ci.company_code=o.company_code
+    </if>
+    where 1=1
+    <if test="leader_name != null and leader_name != '' ">
+      and compnay.leader_name like concat('%',#{leader_name},'%')
+    </if>
+    <if test="client_name !=null and client_name !=''">
+      and oc.client_name like concat('%',#{client_name},'%')
+    </if>
+    <if test="client_mobile !=null and client_mobile !=''">
+      and oc.client_mobile =#{client_mobile}
+    </if>
+    <if test="contact_name != null and contact_name != '' ">
+      and pi.contact_code like concat('%',#{contact_name},'%')
+    </if>
+    <if test="company_name != null and company_name != '' ">
+      and ci.company_name like concat('%',#{company_name},'%')
+    </if>
+    <if test="product_name != null and product_name!=''">
+      and p.product_name like concat('%',#{product_name},'%')
+    </if>
+    <if test="order_code != null and order_code!=''">
+      and o.order_code = #{order_code}
+    </if>
+    <if test="group_code != null and group_code!=''">
+      and o.group_code = #{group_code}
+    </if>
+    <if test="company_order_code != null and company_order_code!=''">
+      and o.company_order_code = #{company_order_code}
+    </if>
+    <if test="product_code != null and product_code!=''">
+      and o.product_code = #{product_code}
+    </if>
+    <if test="creator_id != null">
+      and o.creator_id = #{creator_id}
+    </if>
+    <if test="departure_date_start != null and departure_date_start != ''">
+      and hall.departure_date <![CDATA[>=]]> #{departure_date_start}
+    </if>
+    <if test="departure_date_end != null and departure_date_end != ''">
+      and hall.departure_date <![CDATA[<=]]> #{departure_date_end}
+    </if>
+    <if test="create_date_start != null and create_date_start != ''">
+      and o.create_time <![CDATA[>=]]> #{create_date_start}
+    </if>
+    <if test="create_date_end != null and create_date_end != ''">
+      and o.create_time <![CDATA[<=]]> #{create_date_end}
+    </if>
+    <if test="state != null">
+      and o.state=#{state}
+    </if>
+    order by hall.departure_date desc
+  </select>
+
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RouteOrder" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_code" property="order_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="product_code" property="product_code" jdbcType="VARCHAR" />
+    <result column="route_plan_code" property="route_plan_code" jdbcType="VARCHAR" />
+    <result column="price_plan_code" property="price_plan_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="contact_code" property="contact_code" jdbcType="VARCHAR" />
+    <result column="company_order_code" property="company_order_code" jdbcType="VARCHAR" />
+    <result column="client_country_id" property="client_country_id" jdbcType="INTEGER" />
+    <result column="client_country_name" property="client_country_name" jdbcType="VARCHAR" />
+    <result column="client_district_id" property="client_district_id" jdbcType="INTEGER" />
+    <result column="client_district_name" property="client_district_name" jdbcType="VARCHAR" />
+    <result column="client_province_id" property="client_province_id" jdbcType="INTEGER" />
+    <result column="client_province_name" property="client_province_name" jdbcType="VARCHAR" />
+    <result column="client_city_id" property="client_city_id" jdbcType="INTEGER" />
+    <result column="client_city_name" property="client_city_name" jdbcType="VARCHAR" />
+    <result column="client_county_id" property="client_county_id" jdbcType="INTEGER" />
+    <result column="client_county_name" property="client_county_name" jdbcType="VARCHAR" />
+    <result column="hotel_level" property="hotel_level" jdbcType="INTEGER" />
+    <result column="room_standard_count" property="room_standard_count" jdbcType="INTEGER" />
+    <result column="room_big_count" property="room_big_count" jdbcType="INTEGER" />
+    <result column="room_three_count" property="room_three_count" jdbcType="INTEGER" />
+    <result column="accompany_room_count" property="accompany_room_count" jdbcType="INTEGER" />
+    <result column="no_room_count" property="no_room_count" jdbcType="INTEGER" />
+    <result column="adult_count" property="adult_count" jdbcType="INTEGER" />
+    <result column="children_count" property="children_count" jdbcType="INTEGER" />
+    <result column="state" property="state" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_code, group_code, product_code, route_plan_code, price_plan_code, company_code, 
+    contact_code, company_order_code, client_country_id, client_country_name, client_district_id, 
+    client_district_name, client_province_id, client_province_name, client_city_id, client_city_name, 
+    client_county_id, client_county_name, hotel_level, room_standard_count, room_big_count, 
+    room_three_count, accompany_room_count,no_room_count,adult_count, children_count, state, remarks, create_time, update_time,
+    creator_id, creator_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from route_order
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByOrderCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_order
+    where order_code = #{order_code}
+  </select>
+
+  <select id="selectByProductCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_order
+    where product_code = #{product_code}
+  </select>
+
+  <select id="selectByGroupCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_order
+    where group_code = #{group_code} order by id asc
+  </select>
+
+  <select id="selectGroupCodeByCompanyName" resultType="java.lang.String" parameterType="java.lang.String" >
+    select r.group_code from route_order r where r.company_code in (select c.company_code from company_info c where c.company_name like concat('%',#{company_name},'%') )
+  </select>
+
+  <select id="selectGroupCodeByLeaderName" resultType="java.lang.String" parameterType="java.lang.String" >
+    select r.group_code from route_order r where r.company_code in (select c.company_code from company_info c where c.leader_name like concat('%',#{leader_name},'%') )
+  </select>
+
+  <select id="selectGroupCodeByContactName" resultType="java.lang.String" parameterType="java.lang.String" >
+    select r.group_code from route_order r where r.contact_code in (select c.person_code from person_info c where c.person_name like concat('%',#{contact_name},'%') )
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from route_order
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String" >
+    delete from route_order
+    where company_code = #{company_code}
+  </delete>
+
+  <delete id="deleteByOrderCode" parameterType="java.lang.String" >
+    delete from route_order
+    where order_code = #{order_code}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from route_order
+    where product_code = #{product_code}
+  </delete>
+
+  <delete id="deleteByGroupCodeList" parameterType="java.lang.String" >
+    delete from route_order
+    where group_code in
+    <foreach collection="group_code_list" item="code" index="index" open="(" separator="," close=")">
+      #{code}
+    </foreach>
+
+  </delete>
+
+
+
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RouteOrder" useGeneratedKeys="true" keyProperty="id">
+    insert into route_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="order_code != null" >
+        order_code,
+      </if>
+      <if test="group_code != null" >
+        group_code,
+      </if>
+      <if test="product_code != null" >
+        product_code,
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code,
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code,
+      </if>
+      <if test="company_code != null" >
+        company_code,
+      </if>
+      <if test="contact_code != null" >
+        contact_code,
+      </if>
+      <if test="company_order_code != null" >
+        company_order_code,
+      </if>
+      <if test="client_country_id != null" >
+        client_country_id,
+      </if>
+      <if test="client_country_name != null" >
+        client_country_name,
+      </if>
+      <if test="client_district_id != null" >
+        client_district_id,
+      </if>
+      <if test="client_district_name != null" >
+        client_district_name,
+      </if>
+      <if test="client_province_id != null" >
+        client_province_id,
+      </if>
+      <if test="client_province_name != null" >
+        client_province_name,
+      </if>
+      <if test="client_city_id != null" >
+        client_city_id,
+      </if>
+      <if test="client_city_name != null" >
+        client_city_name,
+      </if>
+      <if test="client_county_id != null" >
+        client_county_id,
+      </if>
+      <if test="client_county_name != null" >
+        client_county_name,
+      </if>
+      <if test="hotel_level != null" >
+        hotel_level,
+      </if>
+      <if test="room_standard_count != null" >
+        room_standard_count,
+      </if>
+      <if test="room_big_count != null" >
+        room_big_count,
+      </if>
+      <if test="room_three_count != null" >
+        room_three_count,
+      </if>
+      <if test="accompany_room_count != null" >
+        accompany_room_count,
+      </if>
+      <if test="no_room_count != null" >
+        no_room_count,
+      </if>
+      <if test="adult_count != null" >
+        adult_count,
+      </if>
+      <if test="children_count != null" >
+        children_count,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="remarks != null" >
+        remarks,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="order_code != null" >
+        #{order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_code != null" >
+        #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="contact_code != null" >
+        #{contact_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_order_code != null" >
+        #{company_order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="client_country_id != null" >
+        #{client_country_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_country_name != null" >
+        #{client_country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_district_id != null" >
+        #{client_district_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_district_name != null" >
+        #{client_district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_province_id != null" >
+        #{client_province_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_province_name != null" >
+        #{client_province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_city_id != null" >
+        #{client_city_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_city_name != null" >
+        #{client_city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_county_id != null" >
+        #{client_county_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_county_name != null" >
+        #{client_county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="hotel_level != null" >
+        #{hotel_level,jdbcType=INTEGER},
+      </if>
+      <if test="room_standard_count != null" >
+        #{room_standard_count,jdbcType=INTEGER},
+      </if>
+      <if test="room_big_count != null" >
+        #{room_big_count,jdbcType=INTEGER},
+      </if>
+      <if test="room_three_count != null" >
+        #{room_three_count,jdbcType=INTEGER},
+      </if>
+      <if test="accompany_room_count != null" >
+        #{accompany_room_count,jdbcType=INTEGER},
+      </if>
+      <if test="no_room_count != null" >
+        #{no_room_count,jdbcType=INTEGER},
+      </if>
+      <if test="adult_count != null" >
+        #{adult_count,jdbcType=INTEGER},
+      </if>
+      <if test="children_count != null" >
+        #{children_count,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RouteOrder" >
+    update route_order
+    <set >
+      <if test="order_code != null" >
+        order_code = #{order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        group_code = #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="product_code != null" >
+        product_code = #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code = #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code = #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_code != null" >
+        company_code = #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="contact_code != null" >
+        contact_code = #{contact_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_order_code != null" >
+        company_order_code = #{company_order_code,jdbcType=VARCHAR},
+      </if>
+      <if test="client_country_id != null" >
+        client_country_id = #{client_country_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_country_name != null" >
+        client_country_name = #{client_country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_district_id != null" >
+        client_district_id = #{client_district_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_district_name != null" >
+        client_district_name = #{client_district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_province_id != null" >
+        client_province_id = #{client_province_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_province_name != null" >
+        client_province_name = #{client_province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_city_id != null" >
+        client_city_id = #{client_city_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_city_name != null" >
+        client_city_name = #{client_city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="client_county_id != null" >
+        client_county_id = #{client_county_id,jdbcType=INTEGER},
+      </if>
+      <if test="client_county_name != null" >
+        client_county_name = #{client_county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="hotel_level != null" >
+        hotel_level = #{hotel_level,jdbcType=INTEGER},
+      </if>
+      <if test="room_standard_count != null" >
+        room_standard_count = #{room_standard_count,jdbcType=INTEGER},
+      </if>
+      <if test="room_big_count != null" >
+        room_big_count = #{room_big_count,jdbcType=INTEGER},
+      </if>
+      <if test="room_three_count != null" >
+        room_three_count = #{room_three_count,jdbcType=INTEGER},
+      </if>
+      <if test="accompany_room_count != null" >
+        accompany_room_count = #{accompany_room_count,jdbcType=INTEGER},
+      </if>
+      <if test="no_room_count != null" >
+        no_room_count = #{no_room_count,jdbcType=INTEGER},
+      </if>
+      <if test="adult_count != null" >
+        adult_count = #{adult_count,jdbcType=INTEGER},
+      </if>
+      <if test="children_count != null" >
+        children_count = #{children_count,jdbcType=INTEGER},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null" >
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

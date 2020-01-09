@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kunlun.erp.core.mapper.CompanyInfoMapper">
+
+  <resultMap id="ListResultMap" type="com.kunlun.erp.core.dto.company.response.CompanyListDto">
+    <result column="company_type" property="company_type" jdbcType="INTEGER" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="leader_name" property="leader_name" jdbcType="VARCHAR" />
+    <result column="belong_platform" property="belong_platform" jdbcType="INTEGER" />
+    <result column="area_text" property="area_text" jdbcType="VARCHAR" />
+    <result column="cooperation_start_date" property="cooperation_start_date" jdbcType="DATE" />
+    <result column="cooperation_end_date" property="cooperation_end_date" jdbcType="DATE" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="LikeNameResultMap" type="com.kunlun.erp.core.dto.company.response.LikeNameDto">
+    <result column="company_code" property="company_code" jdbcType="INTEGER" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectLikeName" parameterType="com.kunlun.erp.core.dto.condition.CompanyCondition" resultMap="LikeNameResultMap">
+    select company_code,company_name from company_info where 1=1
+    <if test="company_name !=null and company_name!=''">
+      and company_name like concat('%',#{company_name},'%')
+    </if>
+    <if test="company_type_list != null and company_type_list.size()>0">
+      and company_type in
+      <foreach collection="company_type_list" item="code" index="index" open="(" separator="," close=")">
+        #{code}
+      </foreach>
+    </if>
+    order by company_name asc
+  </select>
+
+
+  <select id="countByCompanyName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(id) from company_info where company_name  = #{company_name}
+  </select>
+
+  <select id="selectByCompanyCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from company_info
+    where company_code = #{company_code,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByCompanyCode" parameterType="java.lang.String" >
+    delete from company_info
+    where company_code = #{company_code}
+  </delete>
+
+  <select id="selectByCondition" parameterType="com.kunlun.erp.core.dto.condition.CompanyCondition" resultMap="ListResultMap">
+    select c.company_type,c.company_code,c.company_name,c.leader_name,c.belong_platform,
+    concat(IFNULL(c.country_name,'-'),'/',IFNULL(c.district_name,'-'),'/',IFNULL(c.province_name,'-'),'/',IFNULL(c.city_name,'-'),'/',IFNULL(c.county_name,'-'))  as area_text,
+    c.cooperation_start_date,c.cooperation_end_date,c.creator_name
+    from company_info c  where c.company_type=#{company_type}
+    <if test="company_name != null and company_name!=''">
+      and c.company_name like concat('%',#{company_name},'%')
+    </if>
+    <if test="leader_name != null and leader_name!=''">
+      and c.leader_name like concat('%',#{leader_name},'%')
+    </if>
+    <if test="belong_platform != null">
+      and c.belong_platform = #{belong_platform}
+    </if>
+    <if test="leader_mobile != null and leader_mobile!=''">
+      and c.leader_mobile = #{leader_mobile}
+    </if>
+    <if test="credit_level != null and credit_level!=''">
+      and c.credit_level = #{credit_level}
+    </if>
+    <if test="person_name != null and person_name!=''">
+      and c.company_code in (select p.company_code from person_info p where p.person_name=#{person_name} and p.person_type=0)
+    </if>
+    <if test="person_mobile != null and person_mobile!=''">
+      and c.company_code in (select p.person_mobile from person_info p where p.person_mobile=#{person_mobile} and p.person_type=0)
+    </if>
+    <if test="country_id != null">
+      and c.country_id = #{country_id}
+    </if>
+    <if test="province_id != null">
+      and c.province_id = #{province_id}
+    </if>
+    <if test="city_id != null">
+      and c.city_id = #{city_id}
+    </if>
+    <if test="county_id != null">
+      and c.county_id = #{county_id}
+    </if>
+    order by c.id desc
+  </select>
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.CompanyInfo">
+    <id column="id" property="id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="company_code" property="company_code" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="company_type" property="company_type" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="company_name" property="company_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="belong_platform"  property="belong_platform" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="business_licence_url" property="business_licence_url" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="business_certificate" property="business_certificate" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="country_id"  property="country_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="country_name" property="country_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="district_id"  property="district_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="district_name" property="district_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="province_id" property="province_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="province_name" property="province_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="city_id" property="city_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="city_name" property="city_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="county_id" property="county_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="county_name" property="county_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="address" property="address" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="introduction" property="introduction" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="cooperation_state" property="cooperation_state" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="contact_person" property="contact_person" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="contract_document_state" property="contract_document_state" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="contract_document_url" property="contract_document_url" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="cooperation_start_date" property="cooperation_start_date" javaType="java.util.Date" jdbcType="DATE" />
+    <result column="cooperation_end_date" property="cooperation_end_date" javaType="java.util.Date" jdbcType="DATE" />
+    <result column="leader_name" property="leader_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="leader_mobile" property="leader_mobile" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="leader_wechat" property="leader_wechat" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="leader_address" property="leader_address" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="settlement_mode" property="settlement_mode" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="credit_level" property="credit_level" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="is_common_use" property="is_common_use" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="remarks" property="remarks" javaType="java.lang.String" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" javaType="java.lang.Integer" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" javaType="java.lang.String" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, company_code, company_type, company_name, belong_platform, business_licence_url,
+    business_certificate, country_id, country_name,district_id, district_name,
+    province_id, province_name, city_id, city_name, county_id, county_name,
+    address, introduction, cooperation_state, contact_person, contract_document_state,
+    contract_document_url, cooperation_start_date, cooperation_end_date, leader_name,
+    leader_mobile, leader_wechat, leader_address, settlement_mode, credit_level, is_common_use,
+    remarks, create_time, update_time, creator_id,creator_name
+  </sql>
+
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from company_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.CompanyInfo" useGeneratedKeys="true" keyProperty="id">
+    insert into company_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="company_code != null">
+        company_code,
+      </if>
+      <if test="company_type != null">
+        company_type,
+      </if>
+      <if test="company_name != null">
+        company_name,
+      </if>
+      <if test="belong_platform != null">
+        belong_platform,
+      </if>
+      <if test="business_licence_url != null">
+        business_licence_url,
+      </if>
+      <if test="business_certificate != null">
+        business_certificate,
+      </if>
+      <if test="country_id != null">
+        country_id,
+      </if>
+      <if test="country_name != null">
+        country_name,
+      </if>
+      <if test="district_id != null">
+        district_id,
+      </if>
+      <if test="district_name != null">
+        district_name,
+      </if>
+      <if test="province_id != null">
+        province_id,
+      </if>
+      <if test="province_name != null">
+        province_name,
+      </if>
+      <if test="city_id != null">
+        city_id,
+      </if>
+      <if test="city_name != null">
+        city_name,
+      </if>
+      <if test="county_id != null">
+        county_id,
+      </if>
+      <if test="county_name != null">
+        county_name,
+      </if>
+      <if test="address != null">
+        address,
+      </if>
+      <if test="introduction != null">
+        introduction,
+      </if>
+      <if test="cooperation_state != null">
+        cooperation_state,
+      </if>
+      <if test="contact_person != null">
+        contact_person,
+      </if>
+      <if test="contract_document_state != null">
+        contract_document_state,
+      </if>
+      <if test="contract_document_url != null">
+        contract_document_url,
+      </if>
+      <if test="cooperation_start_date != null">
+        cooperation_start_date,
+      </if>
+      <if test="cooperation_end_date != null">
+        cooperation_end_date,
+      </if>
+      <if test="leader_name != null">
+        leader_name,
+      </if>
+      <if test="leader_mobile != null">
+        leader_mobile,
+      </if>
+      <if test="leader_wechat != null">
+        leader_wechat,
+      </if>
+      <if test="leader_address != null">
+        leader_address,
+      </if>
+      <if test="settlement_mode != null">
+        settlement_mode,
+      </if>
+      <if test="credit_level != null">
+        credit_level,
+      </if>
+      <if test="is_common_use != null">
+        is_common_use,
+      </if>
+      <if test="remarks != null">
+        remarks,
+      </if>
+      <if test="create_time != null">
+        create_time,
+      </if>
+      <if test="update_time != null">
+        update_time,
+      </if>
+      <if test="creator_id != null">
+        creator_id,
+      </if>
+      <if test="creator_name != null">
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="company_code != null">
+        #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_type != null">
+        #{company_type,jdbcType=INTEGER},
+      </if>
+      <if test="company_name != null">
+        #{company_name,jdbcType=VARCHAR},
+      </if>
+      <if test="belong_platform != null">
+        #{belong_platform,jdbcType=INTEGER},
+      </if>
+      <if test="business_licence_url != null">
+        #{business_licence_url,jdbcType=VARCHAR},
+      </if>
+      <if test="business_certificate != null">
+        #{business_certificate,jdbcType=VARCHAR},
+      </if>
+      <if test="country_id != null">
+        #{country_id,jdbcType=INTEGER},
+      </if>
+      <if test="country_name != null">
+        #{country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="district_id != null">
+        #{district_id,jdbcType=INTEGER},
+      </if>
+      <if test="district_name != null">
+        #{district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="province_id != null">
+        #{province_id,jdbcType=INTEGER},
+      </if>
+      <if test="province_name != null">
+        #{province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null">
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="city_name != null">
+        #{city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="county_id != null">
+        #{county_id,jdbcType=INTEGER},
+      </if>
+      <if test="county_name != null">
+        #{county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="introduction != null">
+        #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="cooperation_state != null">
+        #{cooperation_state,jdbcType=INTEGER},
+      </if>
+      <if test="contact_person != null">
+        #{contact_person,jdbcType=INTEGER},
+      </if>
+      <if test="contract_document_state != null">
+        #{contract_document_state,jdbcType=INTEGER},
+      </if>
+      <if test="contract_document_url != null">
+        #{contract_document_url,jdbcType=VARCHAR},
+      </if>
+      <if test="cooperation_start_date != null">
+        #{cooperation_start_date,jdbcType=DATE},
+      </if>
+      <if test="cooperation_end_date != null">
+        #{cooperation_end_date,jdbcType=DATE},
+      </if>
+      <if test="leader_name != null">
+        #{leader_name,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_mobile != null">
+        #{leader_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_wechat != null">
+        #{leader_wechat,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_address != null">
+        #{leader_address,jdbcType=VARCHAR},
+      </if>
+      <if test="settlement_mode != null">
+        #{settlement_mode,jdbcType=INTEGER},
+      </if>
+      <if test="credit_level != null">
+        #{credit_level,jdbcType=VARCHAR},
+      </if>
+      <if test="is_common_use != null">
+        #{is_common_use,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null">
+        #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null">
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null">
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null">
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null">
+        #{creator_name,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.CompanyInfo">
+    update company_info
+    <set>
+      <if test="company_code != null">
+        company_code = #{company_code,jdbcType=VARCHAR},
+      </if>
+      <if test="company_type != null">
+        company_type = #{company_type,jdbcType=INTEGER},
+      </if>
+      <if test="company_name != null">
+        company_name = #{company_name,jdbcType=VARCHAR},
+      </if>
+      <if test="belong_platform != null">
+        belong_platform = #{belong_platform,jdbcType=INTEGER},
+      </if>
+      <if test="business_licence_url != null">
+        business_licence_url = #{business_licence_url,jdbcType=VARCHAR},
+      </if>
+      <if test="business_certificate != null">
+        business_certificate = #{business_certificate,jdbcType=VARCHAR},
+      </if>
+      <if test="country_id != null">
+        country_id = #{country_id,jdbcType=INTEGER},
+      </if>
+      <if test="country_name != null">
+        country_name = #{country_name,jdbcType=VARCHAR},
+      </if>
+      <if test="district_id != null">
+        district_id = #{district_id,jdbcType=INTEGER},
+      </if>
+      <if test="district_name != null">
+        district_name = #{district_name,jdbcType=VARCHAR},
+      </if>
+      <if test="province_id != null">
+        province_id = #{province_id,jdbcType=INTEGER},
+      </if>
+      <if test="province_name != null">
+        province_name = #{province_name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null">
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="city_name != null">
+        city_name = #{city_name,jdbcType=VARCHAR},
+      </if>
+      <if test="county_id != null">
+        county_id = #{county_id,jdbcType=INTEGER},
+      </if>
+      <if test="county_name != null">
+        county_name = #{county_name,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="introduction != null">
+        introduction = #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="cooperation_state != null">
+        cooperation_state = #{cooperation_state,jdbcType=INTEGER},
+      </if>
+      <if test="contact_person != null">
+        contact_person = #{contact_person,jdbcType=INTEGER},
+      </if>
+      <if test="contract_document_state != null">
+        contract_document_state = #{contract_document_state,jdbcType=INTEGER},
+      </if>
+      <if test="contract_document_url != null">
+        contract_document_url = #{contract_document_url,jdbcType=VARCHAR},
+      </if>
+      <if test="cooperation_start_date != null">
+        cooperation_start_date = #{cooperation_start_date,jdbcType=DATE},
+      </if>
+      <if test="cooperation_end_date != null">
+        cooperation_end_date = #{cooperation_end_date,jdbcType=DATE},
+      </if>
+      <if test="leader_name != null">
+        leader_name = #{leader_name,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_mobile != null">
+        leader_mobile = #{leader_mobile,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_wechat != null">
+        leader_wechat = #{leader_wechat,jdbcType=VARCHAR},
+      </if>
+      <if test="leader_address != null">
+        leader_address = #{leader_address,jdbcType=VARCHAR},
+      </if>
+      <if test="settlement_mode != null">
+        settlement_mode = #{settlement_mode,jdbcType=INTEGER},
+      </if>
+      <if test="credit_level != null">
+        credit_level = #{credit_level,jdbcType=VARCHAR},
+      </if>
+      <if test="is_common_use != null">
+        is_common_use = #{is_common_use,jdbcType=INTEGER},
+      </if>
+      <if test="remarks != null">
+        remarks = #{remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null">
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null">
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null">
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null">
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+</mapper>

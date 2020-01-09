@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/core.iml" filepath="$PROJECT_DIR$/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-common/core-common.iml" filepath="$PROJECT_DIR$/core-common/core-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-dto/core-dto.iml" filepath="$PROJECT_DIR$/core-dto/core-dto.iml" />
+      <module fileurl="file://$PROJECT_DIR$/product-server/product-server.iml" filepath="$PROJECT_DIR$/product-server/product-server.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.RouteHallMapper">
+  <resultMap id="PaymentDtoResultMap" type="com.kunlun.erp.core.dto.finance.PaymentDto" >
+    <result column="trade_code" property="trade_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="company_code" property="company_code" jdbcType="VARCHAR" />
+    <result column="company_name" property="company_name" jdbcType="VARCHAR" />
+    <result column="settlement_mode" property="settlement_mode" jdbcType="INTEGER" />
+    <result column="amount_receivable" property="amount_receivable" jdbcType="DECIMAL" />
+    <result column="amount_not_received" property="amount_not_received" jdbcType="DECIMAL" />
+    <result column="amount_payable" property="amount_payable" jdbcType="DECIMAL" />
+    <result column="amount_not_pay" property="amount_not_pay" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <select id="selectPaymentDtoByCondition" parameterType="com.kunlun.erp.core.dto.finance.request.PaymentListReqDto" resultMap="PaymentDtoResultMap">
+    select v.trade_code,v.group_code,v.company_code,v.company_name,v.settlement_mode,v.amount_payable,v.amount_paid,
+    v.amount_not_pay
+    from supplier_receive_view v where 1=1
+    <if test="company_name != null and company_name != '' ">
+      and v.company_name like concat('%',#{company_name},'%')
+    </if>
+    <if test="group_code != null and group_code!=''">
+      and v.group_code = #{group_code}
+    </if>
+    <if test="trade_code != null and trade_code.size()>0">
+      and v.trade_code in
+      <foreach collection="trade_code" item="code" index="index" open="(" separator="," close=")">
+        #{code}
+      </foreach>
+    </if>
+    <if test="payment_state != null ">
+      <choose>
+        <!--未付-->
+        <when test="payment_state==0">
+          and v.amount_payable <![CDATA[>]]> v.amount_paid
+        </when>
+        <!--已付-->
+        <otherwise>
+          and v.amount_paid <![CDATA[>=]]> v.amount_payable
+        </otherwise>
+      </choose>
+    </if>
+    <if test="account_no!= null and account_no!='' ">
+      and v.company_code in (select f.company_code from financial_account f where f.account_no=#{account_no})
+    </if>
+    order by v.group_code asc
+  </select>
+
+
+
+
+  <resultMap id="DtoEndResultMap" type="com.kunlun.erp.core.dto.finance.RouteHallEndDto" >
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="disband_date" property="disband_date" jdbcType="DATE" />
+    <result column="adult_count" property="adult_count" jdbcType="INTEGER" />
+    <result column="children_count" property="children_count" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+    <result column="approve_state" property="approve_state" jdbcType="INTEGER" />
+    <result column="approve_name" property="approve_name" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+  <select id="selectListDtoEndByCondition" parameterType="com.kunlun.erp.core.dto.condition.RouteHallCondition" resultMap="DtoEndResultMap">
+    select hall.group_code,hall.departure_date,hall.disband_date,get_adult_by_group_code(hall.group_code) as adult_count,
+    get_children_by_group_code(hall.group_code) as children_count,p.creator_name,hall.approve_state,hall.approve_name
+    from route_hall hall
+    left join product_info p on hall.product_code = p.product_code
+    <if test="(client_name !=null and client_name !='') or (client_mobile !=null and client_mobile!='')">
+      left join order_client oc on oc.group_code=hall.group_code
+    </if>
+    where hall.status <![CDATA[<]]> 3 and unix_timestamp(disband_date) <![CDATA[<]]>  unix_timestamp(NOW())
+    <if test="product_code != null and product_code!=''">
+      and hall.product_code = #{product_code}
+    </if>
+    <if test="group_code != null and group_code!=''">
+      and hall.group_code = #{group_code}
+    </if>
+    <if test="product_name != null and product_name!=''">
+      and p.product_name like concat('%',#{product_name},'%')
+    </if>
+    <if test="creator_id != null">
+      and hall.creator_id = #{creator_id}
+    </if>
+    <if test="departure_start_date != null and departure_start_date != ''">
+      and hall.departure_date <![CDATA[>=]]> #{departure_start_date}
+    </if>
+    <if test="departure_end_date != null and departure_end_date != ''">
+      and hall.departure_date <![CDATA[<=]]> #{departure_end_date}
+    </if>
+    <if test="client_name !=null and client_name !=''">
+      and oc.client_name like concat('%',#{client_name},'%')
+    </if>
+    <if test="client_mobile !=null and client_mobile !=''">
+      and oc.client_mobile =#{client_mobile}
+    </if>
+    <if test="order_create_start_date != null and order_create_start_date != '' and order_create_end_date!=null and order_create_end_date !=''">
+      and hall.group_code in (select ro.group_code from route_order ro where ro.create_time <![CDATA[>=]]> #{order_create_start_date} and ro.create_time <![CDATA[<=]]> #{order_create_end_date})
+    </if>
+    <if test="order_code != null and order_code!=''">
+      and hall.group_code in (select ro.group_code from route_order ro where ro.order_code = #{order_code} )
+    </if>
+    <if test="company_order_code != null and company_order_code!=''">
+      and ro.company_order_code = #{company_order_code}
+    </if>
+    <if test="order_state != null">
+      and hall.group_code in (select ro.group_code from route_order ro where ro.state=#{order_state} )
+    </if>
+    order by hall.departure_date desc
+  </select>
+
+
+
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.routeHall.RouteHallDto" >
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="disband_date" property="disband_date" jdbcType="DATE" />
+    <result column="product_name" property="product_name" jdbcType="VARCHAR" />
+    <result column="count_plan" property="count_plan" jdbcType="INTEGER" />
+    <result column="count_confirm" property="count_confirm" jdbcType="INTEGER" />
+    <result column="count_hold" property="count_hold" jdbcType="INTEGER" />
+    <result column="count_remain" property="count_remain" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+  </resultMap>
+
+  <sql id="Dto_Column_List" >
+    group_code, departure_date, disband_date, product_name, count_plan, count_confirm, count_hold,
+    count_remain, getRouteHallStatus(status,departure_date,disband_date) as status
+  </sql>
+
+  <select id="selectDtoByCondition" parameterType="com.kunlun.erp.core.dto.condition.RouteHallCondition" resultMap="DtoResultMap">
+    select <include refid="Dto_Column_List" /> from route_hall where 1=1
+    <if test="group_code != null and group_code!=''">
+      and group_code = #{group_code}
+    </if>
+    <if test="product_code != null and product_code!=''">
+      and product_code = #{product_code}
+    </if>
+    <if test="product_name != null and product_name!=''">
+      and product_name like concat('%',#{product_name},'%')
+    </if>
+    <if test="status != null">
+      and status = #{status}
+    </if>
+    <if test="not_include_status != null and not_include_status.size()>0">
+      and status not in
+      <foreach collection="not_include_status" item="s" index="index" open="(" separator="," close=")">
+        #{s}
+      </foreach>
+    </if>
+    <if test="internal_code != null and internal_code != '' ">
+      and internal_code = #{internal_code}
+    </if>
+    <if test="departure_start_date != null and departure_start_date != ''">
+      and departure_date <![CDATA[>]]> #{departure_start_date}
+    </if>
+    <if test="departure_end_date != null and departure_end_date != ''">
+      and departure_date <![CDATA[<=]]> #{departure_end_date}
+    </if>
+    <if test="disband_start_date != null and disband_start_date != ''">
+      and disband_date <![CDATA[>=]]> #{disband_start_date}
+    </if>
+    <if test="disband_end_date != null and disband_end_date != ''">
+      and disband_date <![CDATA[<=]]> #{disband_end_date}
+    </if>
+    order by departure_date desc
+  </select>
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.RouteHall" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="product_code" property="product_code" jdbcType="VARCHAR" />
+    <result column="internal_code" property="internal_code" jdbcType="VARCHAR" />
+    <result column="route_plan_code" property="route_plan_code" jdbcType="VARCHAR" />
+    <result column="price_plan_code" property="price_plan_code" jdbcType="VARCHAR" />
+    <result column="group_code" property="group_code" jdbcType="VARCHAR" />
+    <result column="departure_date" property="departure_date" jdbcType="DATE" />
+    <result column="disband_date" property="disband_date" jdbcType="DATE" />
+    <result column="product_name" property="product_name" jdbcType="VARCHAR" />
+    <result column="count_plan" property="count_plan" jdbcType="INTEGER" />
+    <result column="count_confirm" property="count_confirm" jdbcType="INTEGER" />
+    <result column="count_hold" property="count_hold" jdbcType="INTEGER" />
+    <result column="count_remain" property="count_remain" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="approve_state" property="approve_state" jdbcType="INTEGER" />
+    <result column="approve_remarks" property="approve_remarks" jdbcType="VARCHAR" />
+    <result column="approve_time" property="approve_time" jdbcType="TIMESTAMP" />
+    <result column="approve_id" property="approve_id" jdbcType="INTEGER" />
+    <result column="approve_name" property="approve_name" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="update_time" jdbcType="TIMESTAMP" />
+    <result column="creator_id" property="creator_id" jdbcType="INTEGER" />
+    <result column="creator_name" property="creator_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, product_code, internal_code, route_plan_code, price_plan_code,group_code,
+    departure_date, disband_date, product_name, count_plan, count_confirm, count_hold, 
+    count_remain, status, approve_state,approve_remarks,approve_time,approve_id,approve_name,create_time, update_time, creator_id, creator_name
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from route_hall
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectGroupCodeByProductCode" resultType="java.lang.String" parameterType="java.lang.String" >
+    select group_code from route_hall
+    where product_code = #{product_code}
+  </select>
+
+  <select id="selectByGroupCode" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from route_hall
+    where group_code = #{group_code}
+  </select>
+
+  <select id="selectStatusByGroupCode" resultType="java.lang.Integer" parameterType="java.lang.String" >
+    select getRouteHallStatus(r.status,r.departure_date,r.disband_date) from route_hall r
+    where r.group_code = #{group_code}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from route_hall
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByPricePlanCode" parameterType="java.lang.String" >
+    delete from route_hall
+    where price_plan_code = #{price_plan_code}
+  </delete>
+
+  <delete id="deleteByProductCode" parameterType="java.lang.String" >
+    delete from route_hall
+    where product_code = #{product_code}
+  </delete>
+
+  <delete id="deleteByGroupCode" parameterType="java.lang.String" >
+    delete from route_hall
+    where group_code in
+    <foreach collection="group_code_list" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </delete>
+
+  <delete id="deleteByPricePlanCodeAndDate" >
+    delete from route_hall
+    where price_plan_code = #{price_plan_code} and departure_date in
+    <foreach collection="departure_date" item="d" index="index" open="(" separator="," close=")">
+      #{d}
+    </foreach>
+  </delete>
+
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.RouteHall" useGeneratedKeys="true" keyProperty="id">
+    insert into route_hall
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="product_code != null" >
+        product_code,
+      </if>
+      <if test="internal_code != null" >
+        internal_code,
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code,
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code,
+      </if>
+      <if test="group_code != null" >
+        group_code,
+      </if>
+      <if test="departure_date != null" >
+        departure_date,
+      </if>
+      <if test="disband_date != null" >
+        disband_date,
+      </if>
+      <if test="product_name != null" >
+        product_name,
+      </if>
+      <if test="count_plan != null" >
+        count_plan,
+      </if>
+      <if test="count_confirm != null" >
+        count_confirm,
+      </if>
+      <if test="count_hold != null" >
+        count_hold,
+      </if>
+      <if test="count_remain != null" >
+        count_remain,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="approve_state != null" >
+        approve_state,
+      </if>
+      <if test="approve_remarks != null" >
+        approve_remarks,
+      </if>
+      <if test="approve_time != null" >
+        approve_time,
+      </if>
+      <if test="approve_id != null" >
+        approve_id,
+      </if>
+      <if test="approve_name != null" >
+        approve_name,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="update_time != null" >
+        update_time,
+      </if>
+      <if test="creator_id != null" >
+        creator_id,
+      </if>
+      <if test="creator_name != null" >
+        creator_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="product_code != null" >
+        #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="internal_code != null" >
+        #{internal_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="departure_date != null" >
+        #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="disband_date != null" >
+        #{disband_date,jdbcType=DATE},
+      </if>
+      <if test="product_name != null" >
+        #{product_name,jdbcType=VARCHAR},
+      </if>
+      <if test="count_plan != null" >
+        #{count_plan,jdbcType=INTEGER},
+      </if>
+      <if test="count_confirm != null" >
+        #{count_confirm,jdbcType=INTEGER},
+      </if>
+      <if test="count_hold != null" >
+        #{count_hold,jdbcType=INTEGER},
+      </if>
+      <if test="count_remain != null" >
+        #{count_remain,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="approve_state != null" >
+        #{approve_state,jdbcType=INTEGER},
+      </if>
+      <if test="approve_remarks != null" >
+        #{approve_remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="approve_time != null" >
+        #{approve_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approve_id != null" >
+        #{approve_id,jdbcType=INTEGER},
+      </if>
+      <if test="approve_name != null" >
+        #{approve_name,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kunlun.erp.core.entity.RouteHall" >
+    update route_hall
+    <set >
+      <if test="product_code != null" >
+        product_code = #{product_code,jdbcType=VARCHAR},
+      </if>
+      <if test="internal_code != null" >
+        internal_code = #{internal_code,jdbcType=VARCHAR},
+      </if>
+      <if test="route_plan_code != null" >
+        route_plan_code = #{route_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="price_plan_code != null" >
+        price_plan_code = #{price_plan_code,jdbcType=VARCHAR},
+      </if>
+      <if test="group_code != null" >
+        group_code = #{group_code,jdbcType=VARCHAR},
+      </if>
+      <if test="departure_date != null" >
+        departure_date = #{departure_date,jdbcType=DATE},
+      </if>
+      <if test="disband_date != null" >
+        disband_date = #{disband_date,jdbcType=DATE},
+      </if>
+      <if test="product_name != null" >
+        product_name = #{product_name,jdbcType=VARCHAR},
+      </if>
+      <if test="count_plan != null" >
+        count_plan = #{count_plan,jdbcType=INTEGER},
+      </if>
+      <if test="count_confirm != null" >
+        count_confirm = #{count_confirm,jdbcType=INTEGER},
+      </if>
+      <if test="count_hold != null" >
+        count_hold = #{count_hold,jdbcType=INTEGER},
+      </if>
+      <if test="count_remain != null" >
+        count_remain = #{count_remain,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="approve_state != null" >
+        approve_state = #{approve_state,jdbcType=INTEGER},
+      </if>
+      <if test="approve_remarks != null" >
+        approve_remarks = #{approve_remarks,jdbcType=VARCHAR},
+      </if>
+      <if test="approve_time != null" >
+        approve_time = #{approve_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="approve_id != null" >
+        approve_id = #{approve_id,jdbcType=INTEGER},
+      </if>
+      <if test="approve_name != null" >
+        approve_name = #{approve_name,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator_id != null" >
+        creator_id = #{creator_id,jdbcType=INTEGER},
+      </if>
+      <if test="creator_name != null" >
+        creator_name = #{creator_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <update id="updateByProductCode" parameterType="com.kunlun.erp.core.dto.routeHall.ProductUpdateNotifyDto" >
+    update route_hall
+    <set >
+      <if test="product_name != null" >
+        product_name = #{product_name,jdbcType=VARCHAR},
+      </if>
+      <if test="internal_code != null" >
+        internal_code = #{internal_code,jdbcType=VARCHAR},
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where product_code = #{product_code}
+  </update>
+
+  <update id="updateByPerson" parameterType="com.kunlun.erp.core.dto.routeHall.PersonUpdateNotifyDto" >
+    update route_hall
+    <set >
+      <if test="confirm_count != null" >
+        count_confirm = (count_confirm + #{confirm_count}),
+      </if>
+      <if test="hold_count != null" >
+        count_hold = (count_hold + #{hold_count}),
+      </if>
+      <if test="count_remain != null" >
+        count_remain = (count_remain + #{remain_count}),
+      </if>
+      <if test="update_time != null" >
+        update_time = #{update_time,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where group_code = #{group_code}
+  </update>
+</mapper>

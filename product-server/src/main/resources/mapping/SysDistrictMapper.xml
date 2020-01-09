@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kunlun.erp.core.mapper.SysDistrictMapper" >
+
+  <resultMap id="DtoResultMap" type="com.kunlun.erp.core.dto.area.DistrictDto" >
+    <id column="district_id" property="district_id" jdbcType="INTEGER" />
+    <result column="country_id" property="country_id" jdbcType="INTEGER" />
+    <result column="zh_name" property="zh_name" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <select id="selectShortDto" resultMap="DtoResultMap" >
+    select district_id,country_id,zh_name from sys_district order by country_id asc
+  </select>
+
+
+
+
+
+
+  <resultMap id="BaseResultMap" type="com.kunlun.erp.core.entity.SysDistrict" >
+    <constructor >
+      <idArg column="district_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="country_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="zh_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="state" jdbcType="INTEGER" javaType="java.lang.Integer" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    district_id, country_id, zh_name, state
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sys_district
+    where district_id = #{district_id,jdbcType=INTEGER}
+  </select>
+  <insert id="insertSelective" parameterType="com.kunlun.erp.core.entity.SysDistrict" >
+    insert into sys_district
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="district_id != null" >
+        district_id,
+      </if>
+      <if test="country_id != null" >
+        country_id,
+      </if>
+      <if test="zh_name != null" >
+        zh_name,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="district_id != null" >
+        #{district_id,jdbcType=INTEGER},
+      </if>
+      <if test="country_id != null" >
+        #{country_id,jdbcType=INTEGER},
+      </if>
+      <if test="zh_name != null" >
+        #{zh_name,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+</mapper>

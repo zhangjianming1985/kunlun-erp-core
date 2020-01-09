@@ -1,0 +1,43 @@
+1、静态访问
+    http://localhost:9898/index.html
+2、REST访问
+    http://localhost:9898/hello
+3、两种监听启动方式
+    启动日志输出
+4、两种Filter
+    第一种 http://localhost:9898/filter/my/1/* 、http://localhost:9898/filter/my/2/*
+    第二种 http://localhost:9898/filter/your/1/* 、http://localhost:9898/filter/your/2/*
+5、两种Servlet
+    第一种  http://localhost:9898/servlet/my/*
+    第二种  http://localhost:9898/servlet/your/*
+6、测试DB读写 （GET方式）
+    http://localhost:9898/user/add
+7、JSP测试
+    http://localhost:9898/jsp/showUser
+8、freemarker 测试
+    http://localhost:9898/freemarker/showUser
+    9、swagger API 文档  http://localhost:9898/swagger-ui.html
+
+    http://120.24.95.15:9898/swagger-ui.html#/
+    http://120.24.95.15:10000/swagger-ui.html#/
+
+MYSQL服务器
+120.24.95.15 root Root@2019
+
+SSH:
+120.24.95.15 test test@2019
+
+REDIST:
+redis 密码JF@@mofang
+
+项目启动脚本
+ps -ef | grep erp-core-server-1.0-SNAPSHOT.jar | grep -v 'grep' | awk -F ' ' '{print $2}' | xargs kill
+nohup /usr/local/jdk1.8.0_11/bin/java -jar erp-core-server-1.0-SNAPSHOT.jar &
+
+
+
+原始mysql model设置：
+ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+修改mysql设置
+set sql_mode="STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";
+SET @@global.sql_mode ="STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION";
