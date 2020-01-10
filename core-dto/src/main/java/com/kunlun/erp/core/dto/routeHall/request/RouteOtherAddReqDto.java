@@ -5,6 +5,7 @@ import com.kunlun.erp.core.dto.routeHall.RouteOtherDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class RouteOtherAddReqDto {
     @ApiModelProperty(required = true,value = "团号",example = "13000001409888077")
     @NotBlank(message = ErrorCodeConstant.HALL_DAILY_CODE_INVALID)
     private String group_code;
-
+    @Valid
     private List<RouteOtherDto> other_data;
 
     public String getGroup_code() {

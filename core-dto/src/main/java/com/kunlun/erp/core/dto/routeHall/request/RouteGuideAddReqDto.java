@@ -5,6 +5,7 @@ import com.kunlun.erp.core.dto.routeHall.RouteGuidesDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class RouteGuideAddReqDto {
     @NotBlank(message = ErrorCodeConstant.HALL_DAILY_CODE_INVALID)
     private String group_code;
 
+    @Valid
     private List<RouteGuidesDto> guide_data;
 
     public String getGroup_code() {

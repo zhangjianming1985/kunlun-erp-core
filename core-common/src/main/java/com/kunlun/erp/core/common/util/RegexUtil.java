@@ -49,12 +49,14 @@ public class RegexUtil {
      * @return boolean
      */
     public static boolean isPhone(String phone) {
-        if (StringUtils.isBlank(phone)) {
+/*        if (StringUtils.isBlank(phone)) {
             return false;
         }
         String REGEX = "^([0-9]{3,4}-)?[0-9]{7,8}$";
 
-        return phone.matches(REGEX);
+        return phone.matches(REGEX);*/
+        return commonStrCheck(phone,5,20,true);
+
     }
 
     /**

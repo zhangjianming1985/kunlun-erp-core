@@ -58,7 +58,7 @@ public class RouteInsuranceDto {
     private String fee;
 
     @ApiModelProperty(required = true,value = "投保数量",example = "5")
-    @NotBlank(message = ErrorCodeConstant.INSURANCE_COUNT_INVALID)
+    @NotNull(message = ErrorCodeConstant.INSURANCE_COUNT_INVALID)
     private Integer insurance_count;
 
     @ApiModelProperty(required = true,value = "总价",example = "105.00")

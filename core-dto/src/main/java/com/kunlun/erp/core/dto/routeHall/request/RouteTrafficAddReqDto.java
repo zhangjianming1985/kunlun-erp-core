@@ -6,6 +6,7 @@ import com.kunlun.erp.core.dto.routeOrder.OrderClientDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -21,10 +22,10 @@ public class RouteTrafficAddReqDto {
     @ApiModelProperty(required = true,value = "团号",example = "13000001409888077")
     @NotBlank(message = ErrorCodeConstant.HALL_DAILY_CODE_INVALID)
     private String group_code;
-
+    @Valid
     private List<RouteTrafficDto> traffic_data;
 
-
+    @Valid
     private List<OrderClientDto> client_data;
 
     public String getGroup_code() {
