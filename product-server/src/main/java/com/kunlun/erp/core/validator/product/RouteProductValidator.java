@@ -1,10 +1,13 @@
 package com.kunlun.erp.core.validator.product;
 
 import com.kunlun.erp.core.common.constants.ErrorCodeConstant;
+import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.constants.Urls;
 import com.kunlun.erp.core.common.util.RegexUtil;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.product.RouteProductDto;
 import com.kunlun.erp.core.dto.product.request.*;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.entity.ProductInfo;
 import com.kunlun.erp.core.service.product.ProductService;
 import com.kunlun.erp.core.validator.AbstractValidator;
@@ -68,11 +71,11 @@ public class RouteProductValidator extends AbstractValidator {
 
         }else if (obj instanceof  RouteProductDetailRequest){
             RouteProductDetailRequest request = (RouteProductDetailRequest)obj;
-            error_code = this.checkProductCode(request.getBody().getProduct_code());
+            error_code = this.checkProductCode(request.getBody().getProduct_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
         }else if (obj instanceof RouteProductEditRequest){
             RouteProductEditRequest request = (RouteProductEditRequest)obj;
             RouteProductDto req_body = request.getBody();
-            error_code = this.checkProductCode(request.getBody().getProduct_code());
+            error_code = this.checkProductCode(request.getBody().getProduct_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             if (error_code == null){
                 error_code = product_category_validator.checkCategoryCode(req_body.getProduct_category_code());
             }
@@ -105,7 +108,7 @@ public class RouteProductValidator extends AbstractValidator {
 
         }else if (obj instanceof  RouteProductDelRequest){
             RouteProductDelRequest request = (RouteProductDelRequest)obj;
-            error_code = this.checkProductCode(request.getBody().getProduct_code());
+            error_code = this.checkProductCode(request.getBody().getProduct_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
         }
 
         return error_code;
@@ -129,6 +132,28 @@ public class RouteProductValidator extends AbstractValidator {
                 }
             }
 
+        }
+        return error_code;
+    }
+
+    /**
+     * 校验产品是否存在
+     * @param product_code
+     * @return
+     */
+    public String checkProductCode(String product_code,String trans_no,String secret_key,String per_key){
+        String error_code=null;
+        ProductInfo product_record = product_service.selectByProductCode(product_code);
+        if (product_record==null){
+            error_code= ErrorCodeConstant.PRODUCT_IS_NOT_EXIST;
+        }
+        if (error_code == null){
+            AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
+            if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+                if (product_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                    error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
+                }
+            }
         }
         return error_code;
     }

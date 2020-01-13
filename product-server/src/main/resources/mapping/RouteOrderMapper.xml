@@ -120,7 +120,7 @@
   </resultMap>
 
 
-  <select id="selectListDtoByCondition" parameterType="com.kunlun.erp.core.dto.routeOrder.request.RouteOrderListReqDto" resultMap="ListDtoResultMap">
+  <select id="selectListDtoByCondition" parameterType="com.kunlun.erp.core.dto.condition.RouteOrderCondition" resultMap="ListDtoResultMap">
     select o.order_code,p.product_name,hall.departure_date,o.adult_count,o.children_count,get_order_amount(o.order_code) as amount,
     o.create_time,o.state
     from route_order o
@@ -186,6 +186,9 @@
     </if>
     <if test="state != null">
       and o.state=#{state}
+    </if>
+    <if test="uid != null">
+      and o.creator_id=#{uid}
     </if>
     order by hall.departure_date desc
   </select>

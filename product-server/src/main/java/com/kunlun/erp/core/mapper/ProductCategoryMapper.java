@@ -20,7 +20,7 @@ public interface ProductCategoryMapper {
 
     int updateByPrimaryKeySelective(ProductCategory record);
 
-    List<ProductCategoryDto> selectDtoList(@Param("category_name") String category_name,@Param("category_state")Integer category_state);
+    List<ProductCategoryDto> selectDtoList(@Param("category_name") String category_name,@Param("category_state")Integer category_state,@Param("uid")Integer uid);
 
 
 }

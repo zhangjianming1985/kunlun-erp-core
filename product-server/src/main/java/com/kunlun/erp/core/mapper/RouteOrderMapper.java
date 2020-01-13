@@ -1,12 +1,12 @@
 package com.kunlun.erp.core.mapper;
 
+import com.kunlun.erp.core.dto.condition.RouteOrderCondition;
 import com.kunlun.erp.core.dto.finance.CollectedDto;
 import com.kunlun.erp.core.dto.finance.request.CollectedListReqDto;
 import com.kunlun.erp.core.dto.routeHall.PeopleCount;
 import com.kunlun.erp.core.dto.routeHall.RoomCount;
 import com.kunlun.erp.core.dto.routeHall.SalesChannelDto;
 import com.kunlun.erp.core.dto.routeOrder.OrderListDto;
-import com.kunlun.erp.core.dto.routeOrder.request.RouteOrderListReqDto;
 import com.kunlun.erp.core.entity.RouteOrder;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,7 +34,7 @@ public interface RouteOrderMapper {
 
     int updateByPrimaryKeySelective(RouteOrder record);
 
-    List<OrderListDto> selectListDtoByCondition(RouteOrderListReqDto condition);
+    List<OrderListDto> selectListDtoByCondition(RouteOrderCondition condition);
 
     PeopleCount peopleCountByGroupCode(@Param("group_code") String group_code);
 

@@ -103,6 +103,12 @@ public class RouteHallCondition extends BaseCondition{
      * 散团结束日期
      */
     private String disband_end_date;
+    /**
+     * 产品类别编号
+     */
+    private String category_code;
+
+    private Integer uid;
 
     public String getGroup_code() {
         return group_code;
@@ -254,5 +260,21 @@ public class RouteHallCondition extends BaseCondition{
 
     public void setNot_include_status(List<Integer> not_include_status) {
         this.not_include_status = not_include_status;
+    }
+
+    public String getCategory_code() {
+        return category_code;
+    }
+
+    public void setCategory_code(String category_code) {
+        this.category_code = category_code;
+    }
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public void setUid(Integer uid) {
+        this.uid = uid;
     }
 }

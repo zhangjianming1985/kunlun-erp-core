@@ -10,6 +10,7 @@ import com.kunlun.erp.core.component.RouteOrderComponent;
 import com.kunlun.erp.core.dto.AbstractRequest;
 import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.common.AreaDto;
+import com.kunlun.erp.core.dto.condition.RouteOrderCondition;
 import com.kunlun.erp.core.dto.product.RoutePlanDto;
 import com.kunlun.erp.core.dto.product.RouteProductDto;
 import com.kunlun.erp.core.dto.product.request.RouteProductDetailReqDto;
@@ -74,6 +75,7 @@ public class RouteOrderServiceImpl extends BaseService implements RouteOrderServ
     private OrderIncomeService route_income_service;
     @Resource
     private RouteOrderIncomeMapper income_dao;
+
 
 
     @Override
@@ -327,8 +329,9 @@ public class RouteOrderServiceImpl extends BaseService implements RouteOrderServ
     public AbstractResponse<RouteOrderListRespDto> list(RouteOrderListRequest request) {
         AbstractResponse<RouteOrderListRespDto> response = dtoFactory.createResponse(request.getHeader());
         RouteOrderListRespDto resp_body = new RouteOrderListRespDto();
-        PageHelper.startPage(request.getBody().getPage_index(), request.getBody().getPage_size(), true);
-        List<OrderListDto> list = order_dao.selectListDtoByCondition(request.getBody());
+        RouteOrderCondition condition = component_route_order.convert(request);
+        PageHelper.startPage(condition.getPage_index(), condition.getPage_size(), true);
+        List<OrderListDto> list = order_dao.selectListDtoByCondition(condition);
         PageInfo<OrderListDto> page_list = new PageInfo<>(list);
         resp_body.setPage_data(page_list);
         response.setBody(resp_body);

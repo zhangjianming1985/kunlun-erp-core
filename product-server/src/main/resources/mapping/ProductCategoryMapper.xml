@@ -19,6 +19,9 @@
     <if test="category_state != null">
       and category_state = #{category_state}
     </if>
+    <if test="uid != null">
+      and creator_id = #{uid}
+    </if>
     order by id desc
   </select>
 

@@ -23,6 +23,8 @@ public class ProductCondition extends BaseCondition{
     @ApiModelProperty(value = "产品类型",example = "阿拉善自驾游")
     private Integer product_category_code;
 
+    private Integer uid;
+
 
     public String getProduct_code() {
         return product_code;
@@ -54,5 +56,13 @@ public class ProductCondition extends BaseCondition{
 
     public void setProduct_category_code(Integer product_category_code) {
         this.product_category_code = product_category_code;
+    }
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public void setUid(Integer uid) {
+        this.uid = uid;
     }
 }

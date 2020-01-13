@@ -1,5 +1,6 @@
 package com.kunlun.erp.core.validator;
 
+import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
 import com.kunlun.erp.core.common.constants.ErrorCodeConstant;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.json.JsonUtil;
@@ -57,6 +58,9 @@ public abstract class AbstractValidator implements Validator {
     protected ProductCategoryValidator product_category_validator;
     @Resource(name = "route_validator")
     protected RouteBaseValidator route_validator;
+
+    @Resource
+    protected PermissionKeyProperties per_properties;
 
     @Override
     public boolean supports(Class<?> clazz) {

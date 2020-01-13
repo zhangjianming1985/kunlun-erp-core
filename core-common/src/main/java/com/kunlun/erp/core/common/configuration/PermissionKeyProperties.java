@@ -12,9 +12,19 @@ import org.springframework.context.annotation.PropertySource;
  * @Version 1.0
  **/
 @Configuration
-@ConfigurationProperties(prefix = "key")
+@ConfigurationProperties(prefix = "key-per")
 @PropertySource(value = "permission-key.properties",encoding = "UTF-8")
 public class PermissionKeyProperties {
+    /**
+     * 查询所有人数据
+     */
+    private String query_all_data;
+    /**
+     * 编辑所有人数据
+     */
+    private String edit_all_data;
+
+
     /**
      * 产品类别设置
      */
@@ -802,5 +812,21 @@ public class PermissionKeyProperties {
 
     public void setDelete_route(String delete_route) {
         this.delete_route = delete_route;
+    }
+
+    public String getQuery_all_data() {
+        return query_all_data;
+    }
+
+    public void setQuery_all_data(String query_all_data) {
+        this.query_all_data = query_all_data;
+    }
+
+    public String getEdit_all_data() {
+        return edit_all_data;
+    }
+
+    public void setEdit_all_data(String edit_all_data) {
+        this.edit_all_data = edit_all_data;
     }
 }

@@ -24,6 +24,9 @@
     p.creator_name
     from product_info p left join product_category pc on p.product_category_code=pc.category_code
     where 1=1
+    <if test="uid != null">
+      and p.creator_id = #{uid}
+    </if>
     <if test="product_code != null and product_code!=''">
       and p.product_code = #{product_code}
     </if>

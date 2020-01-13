@@ -2,6 +2,7 @@ package com.kunlun.erp.core.service.impl.product;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.constants.Urls;
 import com.kunlun.erp.core.common.util.UniqueCodeUtil;
@@ -9,10 +10,12 @@ import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.product.ProductCategoryDto;
 import com.kunlun.erp.core.dto.product.request.*;
 import com.kunlun.erp.core.dto.product.response.*;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.ProductCategory;
 import com.kunlun.erp.core.mapper.ProductCategoryMapper;
 import com.kunlun.erp.core.service.BaseService;
+import com.kunlun.erp.core.service.account.PermissionService;
 import com.kunlun.erp.core.service.product.ProductCategoryService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,10 @@ import java.util.List;
 public class ProductCategoryServiceImpl extends BaseService implements ProductCategoryService {
     @Resource
     private ProductCategoryMapper product_category_dao;
+    @Resource(name = "permission_service")
+    private PermissionService permission_service;
+    @Resource
+    private PermissionKeyProperties per_properties;
 
     @Override
     public ProductCategory getRecordByCategoryCode(String category_code) {
@@ -44,7 +51,13 @@ public class ProductCategoryServiceImpl extends BaseService implements ProductCa
         AbstractResponse<ProductCategoryListRespDto> response = dtoFactory.createResponse(request.getHeader());
         ProductCategoryListRespDto resp_body = new ProductCategoryListRespDto();
         PageHelper.startPage(request.getBody().getPage_index(), request.getBody().getPage_size(), true);
-        List<ProductCategoryDto> list  = product_category_dao.selectDtoList(request.getBody().getCategory_name(),request.getBody().getCategory_state());
+
+        Integer uid=null;
+        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+        if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+            uid=permission_dto.getBody().getUid();
+        }
+        List<ProductCategoryDto> list  = product_category_dao.selectDtoList(request.getBody().getCategory_name(),request.getBody().getCategory_state(),uid);
         PageInfo<ProductCategoryDto> page_info = new PageInfo<>(list);
         resp_body.setPage_data(page_info);
         response.setBody(resp_body);

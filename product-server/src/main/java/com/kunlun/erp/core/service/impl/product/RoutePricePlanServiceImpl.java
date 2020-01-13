@@ -14,10 +14,7 @@ import com.kunlun.erp.core.dto.routeHall.PriceDateDeleteNotifyDto;
 import com.kunlun.erp.core.dto.routeHall.PricePlanDeleteNotifyDto;
 import com.kunlun.erp.core.dto.routeHall.PriceUpdateNotifyDto;
 import com.kunlun.erp.core.dto.user.UserInfoRespDto;
-import com.kunlun.erp.core.entity.RoutePlan;
-import com.kunlun.erp.core.entity.RoutePricePlan;
-import com.kunlun.erp.core.entity.RoutePricePlanCostDetail;
-import com.kunlun.erp.core.entity.RoutePricePlanDetail;
+import com.kunlun.erp.core.entity.*;
 import com.kunlun.erp.core.mapper.*;
 import com.kunlun.erp.core.service.BaseService;
 import com.kunlun.erp.core.service.product.RoutePricePlanService;
@@ -78,6 +75,8 @@ public  class RoutePricePlanServiceImpl extends BaseService implements RoutePric
     private RouteTravelAgencyMapper route_travel_dao;
     @Resource
     private RouteOtherMapper route_other_dao;
+    @Resource
+    private GroupCodeMapper group_code_dao;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -156,7 +155,18 @@ public  class RoutePricePlanServiceImpl extends BaseService implements RoutePric
             }else{
                 //创建价格
                 price_record = new RoutePricePlanDetail();
-                price_record.setPrice_code(UniqueCodeUtil.generateUniqueCode(UniqueCodeUtil.UniquePrefix.route_price_detail.getValue()));
+
+                GroupCode group_code_record = new GroupCode();
+                group_code_record.setProduct_code(route_plan_record.getProduct_code());
+                group_code_record.setRoute_code(route_plan_record.getRoute_code());
+                group_code_record.setRoute_plan_code(route_plan_record.getPlan_code());
+                group_code_record.setPrice_plan_code(price_plan_code);
+                group_code_record.setDepartrue_date(DateUtil.strToDateByFormat(DateUtil.FORMATTER_DATE,date_str));
+                group_code_record.setCreate_time(new Date());
+                group_code_record.setCreator_id(user_info.getBody().getUid());
+                group_code_record.setCreator_name(user_info.getBody().getUserName());
+                group_code_dao.insertSelective(group_code_record);
+                price_record.setPrice_code(String.valueOf(group_code_record.getId()));
                 price_record.setProduct_code(route_plan_record.getProduct_code());
                 price_record.setRoute_code(route_plan_record.getRoute_code());
                 price_record.setRoute_plan_code(route_plan_record.getPlan_code());

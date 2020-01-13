@@ -3,9 +3,11 @@ package com.kunlun.erp.core.validator.routeHall;
 import com.kunlun.erp.core.common.constants.ErrorCodeConstant;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.constants.Urls;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductDetailRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductListRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductStateUpdateRequest;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.entity.RouteHall;
 import com.kunlun.erp.core.mapper.RouteHallMapper;
 import com.kunlun.erp.core.validator.AbstractValidator;
@@ -43,10 +45,10 @@ public class RouteHallValidator  extends AbstractValidator {
         String error_code= null;
         if (obj instanceof HallProductDetailRequest){
             HallProductDetailRequest  request = (HallProductDetailRequest)obj;
-            error_code = this.checkGroupCode(request.getBody().getGroup_code());
+            error_code = this.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
         }else if (obj instanceof HallProductStateUpdateRequest){
             HallProductStateUpdateRequest request = (HallProductStateUpdateRequest)obj;
-            error_code= this.checkGroupCode(request.getBody().getGroup_code());
+            error_code= this.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             if (error_code == null){
                 RouteHall record = hall_dao.selectByGroupCode(request.getBody().getGroup_code());
                 if (record.getStatus() == request.getBody().getState()){
@@ -81,6 +83,28 @@ public class RouteHallValidator  extends AbstractValidator {
 
             }
 
+        }
+        return error_code;
+    }
+
+    /**
+     * 校验团号
+     * @param group_code
+     * @return
+     */
+    public String checkGroupCode(String group_code,String trans_no,String secret_key,String per_key){
+        String error_code = null;
+        RouteHall hall_record = hall_dao.selectByGroupCode(group_code);
+        if (hall_record == null){
+            error_code =  ErrorCodeConstant.HALL_DAILY_CODE_INVALID;
+        }
+        if (error_code == null){
+            AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
+            if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+                if (hall_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                    error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
+                }
+            }
         }
         return error_code;
     }

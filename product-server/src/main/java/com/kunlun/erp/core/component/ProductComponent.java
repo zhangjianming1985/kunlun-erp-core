@@ -1,10 +1,15 @@
 package com.kunlun.erp.core.component;
 
+import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
+import com.kunlun.erp.core.common.constants.SysConstant;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.common.AreaDto;
 import com.kunlun.erp.core.dto.condition.ProductCondition;
 import com.kunlun.erp.core.dto.product.request.RouteProductListReqDto;
 import com.kunlun.erp.core.dto.product.request.RouteProductListRequest;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.entity.*;
+import com.kunlun.erp.core.service.account.PermissionService;
 import com.kunlun.erp.core.service.area.*;
 import com.kunlun.erp.core.validator.common.AreaValidator;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +38,10 @@ public class ProductComponent {
     protected SysDistrictService sys_district_service;
     @Resource(name = "area_validator")
     protected AreaValidator area_validator;
+    @Resource(name = "permission_service")
+    private PermissionService permission_service;
+    @Resource
+    private PermissionKeyProperties per_properties;
     /**
      * 重设产品地区数据
      * @param new_product
@@ -83,6 +92,10 @@ public class ProductComponent {
         condition.setProduct_name(request_body.getProduct_name());
         condition.setCreator_name(request_body.getCreator_name());
         condition.setProduct_category_code(request_body.getProduct_category_code());
+        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+        if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+            condition.setUid(permission_dto.getBody().getUid());
+        }
         if (request_body.getArea()!=null){
             condition.setCountry_id(request_body.getArea().getCountry_id());
 //            condition.setDistrict_id(request_body.getArea().getDistrict_id());

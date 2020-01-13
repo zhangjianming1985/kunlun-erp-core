@@ -56,6 +56,8 @@ public class CompanyCondition extends BaseCondition {
      */
     private Integer belong_platform;
 
+    private Integer uid;
+
 
     public Integer getCompany_type() {
         return company_type;
@@ -135,5 +137,13 @@ public class CompanyCondition extends BaseCondition {
 
     public void setCompany_type_list(List<Integer> company_type_list) {
         this.company_type_list = company_type_list;
+    }
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public void setUid(Integer uid) {
+        this.uid = uid;
     }
 }

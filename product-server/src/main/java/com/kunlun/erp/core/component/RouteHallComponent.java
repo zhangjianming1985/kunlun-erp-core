@@ -1,11 +1,15 @@
 package com.kunlun.erp.core.component;
 
+import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.util.DateUtil;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.condition.RouteHallCondition;
 import com.kunlun.erp.core.dto.finance.request.HallProductEndListRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductListRequest;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.mapper.RouteOrderMapper;
+import com.kunlun.erp.core.service.account.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +29,10 @@ import java.util.List;
 public class RouteHallComponent {
     @Resource
     private RouteOrderMapper order_dao;
+    @Resource(name = "permission_service")
+    private PermissionService permission_service;
+    @Resource
+    private PermissionKeyProperties per_properties;
 
     /**
      * 获取散团日期
@@ -120,6 +128,11 @@ public class RouteHallComponent {
         condition.setProduct_code(request.getBody().getProduct_code());
         condition.setProduct_name(request.getBody().getProduct_name());
         condition.setInternal_code(request.getBody().getInternal_code());
+        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+        if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+            condition.setUid(permission_dto.getBody().getUid());
+        }
+
         //发团日期区间检索
         if (StringUtils.isNotBlank(request.getBody().getStart_date())){
             condition.setDeparture_start_date(request.getBody().getStart_date());
@@ -127,7 +140,9 @@ public class RouteHallComponent {
         if (StringUtils.isNotBlank(request.getBody().getEnd_date())){
             condition.setDeparture_end_date(request.getBody().getEnd_date());
         }
-
+        if (StringUtils.isNotBlank(request.getBody().getCategory_code())){
+            condition.setCategory_code(request.getBody().getCategory_code());
+        }
         if (request.getBody().getStatus()!=null){
             if (request.getBody().getStatus() == SysConstant.HallProductStatus.pending_trip.getValue()){
                 //检索待出行,发团日期大于当前日期

@@ -4,9 +4,12 @@ import com.kunlun.erp.core.common.constants.ErrorCodeConstant;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.util.RegexUtil;
 import com.kunlun.erp.core.component.CompanyComponent;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.company.request.CompanyAddReqDto;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.entity.CompanyInfo;
 import com.kunlun.erp.core.mapper.CompanyInfoMapper;
+import com.kunlun.erp.core.validator.AbstractValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +23,7 @@ import javax.annotation.Resource;
  * @Version 1.0
  **/
 @Component(value = "base_validator")
-public class BaseInfoValidator {
+public class BaseInfoValidator extends AbstractValidator {
     @Resource(name = "component_company")
     private CompanyComponent component_company;
     @Resource
@@ -49,6 +52,34 @@ public class BaseInfoValidator {
         CompanyInfo company_record = company_dao.selectByCompanyCode(company_code);
         if (company_record==null){
             error_code = ErrorCodeConstant.COMPANY_CODE_INVALID;
+        }
+        return error_code;
+    }
+
+    /**
+     * 企业唯一编号是否存在
+     * 企业数据是否与公司类型匹配
+     * @param company_code
+     * @return
+     */
+    public String checkCompanyCode(String company_code,Integer company_type,String trans_no,String secret_key,String per_key){
+        String error_code = null;
+        CompanyInfo company_record = company_dao.selectByCompanyCode(company_code);
+        if (company_record==null){
+            error_code = ErrorCodeConstant.COMPANY_CODE_INVALID;
+        }
+        if (error_code == null){
+            if (company_record.getCompany_type()!=company_type){
+                error_code = ErrorCodeConstant.COMPANY_CODE_INVALID;
+            }
+        }
+        if (error_code == null){
+            AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
+            if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+                if (company_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                    error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
+                }
+            }
         }
         return error_code;
     }
@@ -199,5 +230,8 @@ public class BaseInfoValidator {
     }
 
 
-
+    @Override
+    public String myValidate(Object obj) {
+        return null;
+    }
 }

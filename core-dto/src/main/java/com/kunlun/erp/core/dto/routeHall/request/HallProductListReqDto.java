@@ -39,6 +39,9 @@ public class HallProductListReqDto {
     @ApiModelProperty(value = "发团结束日期",example = "2019-10-20")
     private String end_date;
 
+    @ApiModelProperty(value = "产品类别编号",example = "520")
+    private String category_code;
+
     public Integer getPage_index() {
         return page_index;
     }
@@ -109,5 +112,13 @@ public class HallProductListReqDto {
 
     public void setProduct_code(String product_code) {
         this.product_code = product_code;
+    }
+
+    public String getCategory_code() {
+        return category_code;
+    }
+
+    public void setCategory_code(String category_code) {
+        this.category_code = category_code;
     }
 }

@@ -769,10 +769,26 @@
             <property name="useActualColumnNames" value="true"/>
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
-          -->
+
         <table
                 tableName="route_travel_agency_income"
                 domainObjectName="RouteTravelAgencyIncome"
+                enableInsert="true"
+                enableSelectByPrimaryKey="true"
+                enableSelectByExample="false"
+                enableUpdateByPrimaryKey="true"
+                enableUpdateByExample="false"
+                enableDeleteByPrimaryKey="true"
+                enableDeleteByExample="false"
+                enableCountByExample="false"
+                selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="true"/>
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+ -->
+        <table
+                tableName="group_code"
+                domainObjectName="GroupCode"
                 enableInsert="true"
                 enableSelectByPrimaryKey="true"
                 enableSelectByExample="false"

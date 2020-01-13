@@ -69,13 +69,13 @@ public class CompanyValidator extends AbstractValidator {
             CompanyDetailRequest request = (CompanyDetailRequest)target;
             error_code = base_validator.checkCompanyType(request.getBody().getCompany_type());
             if (error_code == null){
-                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type());
+                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             }
         }else if (target  instanceof  CompanyEditRequest){
             CompanyEditRequest request = (CompanyEditRequest)target;
             error_code = base_validator.checkCompanyType(request.getBody().getCompany_type());
             if (error_code == null){
-                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type());
+                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             }
             if (error_code == null){
                 error_code = area_validator.check(request.getBody().getArea_info(),false);
@@ -103,7 +103,7 @@ public class CompanyValidator extends AbstractValidator {
             CompanyDeleteRequest request = (CompanyDeleteRequest)target;
             error_code = base_validator.checkCompanyType(request.getBody().getCompany_type());
             if (error_code == null){
-                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type());
+                error_code = base_validator.checkCompanyCode(request.getBody().getCompany_code(),request.getBody().getCompany_type(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             }
         }
 

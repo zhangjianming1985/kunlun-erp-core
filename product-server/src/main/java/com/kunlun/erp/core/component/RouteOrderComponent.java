@@ -1,7 +1,14 @@
 package com.kunlun.erp.core.component;
 
+import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
+import com.kunlun.erp.core.common.constants.SysConstant;
+import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.common.AreaDto;
+import com.kunlun.erp.core.dto.condition.RouteOrderCondition;
+import com.kunlun.erp.core.dto.routeOrder.request.RouteOrderListRequest;
+import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.entity.*;
+import com.kunlun.erp.core.service.account.PermissionService;
 import com.kunlun.erp.core.service.area.*;
 import com.kunlun.erp.core.validator.common.AreaValidator;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +37,39 @@ public class RouteOrderComponent {
     protected SysDistrictService sys_district_service;
     @Resource(name = "area_validator")
     protected AreaValidator area_validator;
+    @Resource(name = "permission_service")
+    private PermissionService permission_service;
+    @Resource
+    private PermissionKeyProperties per_properties;
+
+
+    public RouteOrderCondition convert(RouteOrderListRequest request){
+        RouteOrderCondition condition = new RouteOrderCondition();
+        condition.setPage_index(request.getBody().getPage_index());
+        condition.setPage_size(request.getBody().getPage_size());
+        condition.setProduct_code(request.getBody().getProduct_code());
+        condition.setProduct_name(request.getBody().getProduct_name());
+        condition.setCreator_id(request.getBody().getCreator_id());
+        condition.setCompany_name(request.getBody().getCompany_name());
+        condition.setLeader_name(request.getBody().getLeader_name());
+        condition.setContact_name(request.getBody().getContact_name());
+        condition.setDeparture_date_start(request.getBody().getDeparture_date_start());
+        condition.setDeparture_date_end(request.getBody().getDeparture_date_end());
+        condition.setClient_name(request.getBody().getClient_name());
+        condition.setClient_mobile(request.getBody().getClient_mobile());
+        condition.setCreate_date_start(request.getBody().getCreate_date_start());
+        condition.setCreate_date_end(request.getBody().getCreate_date_end());
+        condition.setState(request.getBody().getState());
+        condition.setOrder_code(request.getBody().getOrder_code());
+        condition.setCompany_order_code(request.getBody().getCompany_order_code());
+        condition.setGroup_code(request.getBody().getGroup_code());
+        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+        if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+            condition.setUid(permission_dto.getBody().getUid());
+        }
+        return  condition;
+    }
+
 
     /**
      * 重设客源地

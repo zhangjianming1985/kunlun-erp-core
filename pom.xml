@@ -30,9 +30,9 @@
             <properties>
                 <profiles.active>dev</profiles.active>
             </properties>
-<!--            <activation>
+            <activation>
                 <activeByDefault>true</activeByDefault>
-            </activation>-->
+            </activation>
         </profile>
         <profile>
             <id>test</id>

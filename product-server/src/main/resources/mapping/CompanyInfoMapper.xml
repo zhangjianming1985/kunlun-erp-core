@@ -54,6 +54,9 @@
     concat(IFNULL(c.country_name,'-'),'/',IFNULL(c.district_name,'-'),'/',IFNULL(c.province_name,'-'),'/',IFNULL(c.city_name,'-'),'/',IFNULL(c.county_name,'-'))  as area_text,
     c.cooperation_start_date,c.cooperation_end_date,c.creator_name
     from company_info c  where c.company_type=#{company_type}
+    <if test="uid != null">
+      and c.creator_id =#{uid}
+    </if>
     <if test="company_name != null and company_name!=''">
       and c.company_name like concat('%',#{company_name},'%')
     </if>

@@ -131,12 +131,19 @@
 
   <select id="selectDtoByCondition" parameterType="com.kunlun.erp.core.dto.condition.RouteHallCondition" resultMap="DtoResultMap">
     select <include refid="Dto_Column_List" /> from route_hall where 1=1
+    <if test="uid != null">
+      and creator_id = #{uid}
+    </if>
     <if test="group_code != null and group_code!=''">
       and group_code = #{group_code}
     </if>
     <if test="product_code != null and product_code!=''">
       and product_code = #{product_code}
     </if>
+    <if test="category_code != null and category_code != '' ">
+      and product_code in (select p.product_code from product_info p where p.product_category_code = #{category_code})
+    </if>
+
     <if test="product_name != null and product_name!=''">
       and product_name like concat('%',#{product_name},'%')
     </if>
