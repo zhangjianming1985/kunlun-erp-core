@@ -53,10 +53,14 @@ public class ProductCategoryServiceImpl extends BaseService implements ProductCa
         PageHelper.startPage(request.getBody().getPage_index(), request.getBody().getPage_size(), true);
 
         Integer uid=null;
-        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
-        if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-            uid=permission_dto.getBody().getUid();
+        if (request.getBody().getPage_size()!=10000){
+            AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+            if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
+                AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(), Urls.Product.NAMESPACE);
+                uid=user_info.getBody().getUid();
+            }
         }
+
         List<ProductCategoryDto> list  = product_category_dao.selectDtoList(request.getBody().getCategory_name(),request.getBody().getCategory_state(),uid);
         PageInfo<ProductCategoryDto> page_info = new PageInfo<>(list);
         resp_body.setPage_data(page_info);

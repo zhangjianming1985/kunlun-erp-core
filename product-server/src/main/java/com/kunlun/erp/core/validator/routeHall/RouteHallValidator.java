@@ -8,6 +8,7 @@ import com.kunlun.erp.core.dto.routeHall.request.HallProductDetailRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductListRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductStateUpdateRequest;
 import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
+import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.RouteHall;
 import com.kunlun.erp.core.mapper.RouteHallMapper;
 import com.kunlun.erp.core.validator.AbstractValidator;
@@ -45,7 +46,7 @@ public class RouteHallValidator  extends AbstractValidator {
         String error_code= null;
         if (obj instanceof HallProductDetailRequest){
             HallProductDetailRequest  request = (HallProductDetailRequest)obj;
-            error_code = this.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
+            error_code = this.checkGroupCode(request.getBody().getGroup_code());
         }else if (obj instanceof HallProductStateUpdateRequest){
             HallProductStateUpdateRequest request = (HallProductStateUpdateRequest)obj;
             error_code= this.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
@@ -101,7 +102,8 @@ public class RouteHallValidator  extends AbstractValidator {
         if (error_code == null){
             AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
             if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-                if (hall_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(trans_no,secret_key, Urls.RouteHall.NAMESPACE);
+                if (hall_record.getCreator_id()!=user_info.getBody().getUid()){
                     error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
                 }
             }

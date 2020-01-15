@@ -3,12 +3,11 @@ package com.kunlun.erp.core.component;
 import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.util.DateUtil;
-import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.condition.RouteHallCondition;
 import com.kunlun.erp.core.dto.finance.request.HallProductEndListRequest;
 import com.kunlun.erp.core.dto.routeHall.request.HallProductListRequest;
-import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
 import com.kunlun.erp.core.mapper.RouteOrderMapper;
+import com.kunlun.erp.core.service.account.AccountService;
 import com.kunlun.erp.core.service.account.PermissionService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,8 @@ public class RouteHallComponent {
     private PermissionService permission_service;
     @Resource
     private PermissionKeyProperties per_properties;
-
+    @Resource(name = "account_service")
+    private AccountService account_service;
     /**
      * 获取散团日期
      * @param start_date
@@ -128,10 +128,11 @@ public class RouteHallComponent {
         condition.setProduct_code(request.getBody().getProduct_code());
         condition.setProduct_name(request.getBody().getProduct_name());
         condition.setInternal_code(request.getBody().getInternal_code());
-        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+/*        AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
         if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-            condition.setUid(permission_dto.getBody().getUid());
-        }
+            AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(), Urls.RouteOrder.NAMESPACE);
+            condition.setUid(user_info.getBody().getUid());
+        }*/
 
         //发团日期区间检索
         if (StringUtils.isNotBlank(request.getBody().getStart_date())){

@@ -3,6 +3,7 @@ package com.kunlun.erp.core.dto;
 import com.kunlun.erp.core.common.constants.SysConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -65,10 +66,22 @@ public class BaseResponseHeader implements Serializable {
             String mapValue = entry.getValue();
             sb.append(mapValue).append("|");
         }
-        return sb.toString();
+        String msg = sb.toString();
+        if (StringUtils.isNotBlank(msg) && msg.indexOf("|")>-1){
+            msg =msg.substring(0,msg.lastIndexOf("|"));
+        }
+        return msg;
     }
 
     public void setError_msg(String error_msg) {
         this.error_msg = error_msg;
+    }
+
+    public static void main(String[] art){
+        String msg="aaaabbb|ccccc|";
+        if (StringUtils.isNotBlank(msg) && msg.indexOf("|")>-1){
+            msg =msg.substring(0,msg.lastIndexOf("|"));
+        }
+        System.out.println(msg);
     }
 }

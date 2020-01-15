@@ -55,7 +55,7 @@ public class RouteTravelAgencyValidator extends AbstractValidator {
             error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
         }else if (obj instanceof RouteTravelAgencyAddRequest){
             RouteTravelAgencyAddRequest request = (RouteTravelAgencyAddRequest)obj;
-            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
+            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             if (error_code == null){
                 error_code = this.checkTravelAgency(request.getBody().getTravel_agency_data());
             }

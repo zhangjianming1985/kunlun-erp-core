@@ -93,7 +93,15 @@ public class PermissionServiceImp extends BaseService implements PermissionServi
         if(target instanceof ProductCategoryListRequest || target instanceof  ProductCategoryAddRequest
                 || target instanceof ProductCategoryDetailRequest || target instanceof ProductCategoryUpdateRequest || target instanceof  ProductCategoryDelRequest){
             //产品类别
-            per_key = permission_key.getProduct_setting();
+            if (target instanceof ProductCategoryListRequest){
+                ProductCategoryListRequest request= (ProductCategoryListRequest)target;
+                if (request.getBody().getPage_size()!=10000){
+                    per_key = permission_key.getProduct_setting();
+                }
+            }else{
+                per_key = permission_key.getProduct_setting();
+            }
+
         }else if(target instanceof RouteProductListRequest){
             //线路列表
             per_key=permission_key.getRoute_product_list();

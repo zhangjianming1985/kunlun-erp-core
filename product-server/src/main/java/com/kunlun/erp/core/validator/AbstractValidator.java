@@ -169,6 +169,9 @@ public abstract class AbstractValidator implements Validator {
         String error_code = null;
         BaseRequestHeader request_header = ((AbstractRequest)target).getHeader();
         String per_key= permission_service.getPermissionKey(target);
+        if (StringUtils.isBlank(per_key)){
+            return error_code;
+        }
         AbstractResponse<HasPermissionRespDto> permission_resp = permission_service.getUserByPermission(request_header.getTrans_no(),request_header.getSecret_key(),per_key);
         if (permission_resp == null){
             error_code = ErrorCodeConstant.NO_RESPONSE_VALIDATE_PERMISSIONS;

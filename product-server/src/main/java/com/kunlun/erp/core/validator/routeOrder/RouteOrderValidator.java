@@ -10,6 +10,7 @@ import com.kunlun.erp.core.dto.routeOrder.request.RouteOrderDeleteRequest;
 import com.kunlun.erp.core.dto.routeOrder.request.RouteOrderDetailRequest;
 import com.kunlun.erp.core.dto.routeOrder.request.RouteOrderListRequest;
 import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
+import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.PersonInfo;
 import com.kunlun.erp.core.entity.RouteHall;
 import com.kunlun.erp.core.entity.RouteOrder;
@@ -63,7 +64,7 @@ public class RouteOrderValidator extends AbstractValidator {
         String error_code  = null;
         if (obj instanceof  RouteOrderDetailRequest){
             RouteOrderDetailRequest request = (RouteOrderDetailRequest)obj;
-            error_code = this.checkOrderCode(request.getBody().getOrder_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
+            error_code = this.checkOrderCode(request.getBody().getOrder_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
         }else if (obj instanceof RouteOrderAddRequest){
             RouteOrderAddRequest request = (RouteOrderAddRequest)obj;
             if (StringUtils.isNotBlank(request.getBody().getOrder_code())){
@@ -72,7 +73,7 @@ public class RouteOrderValidator extends AbstractValidator {
             }
             if (error_code == null){
                 //校验团号
-                error_code= route_hall_validator.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
+                error_code= route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
             }
             if (error_code == null){
                 //校验团审核状态
@@ -171,7 +172,8 @@ public class RouteOrderValidator extends AbstractValidator {
         if (error_code == null){
             AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
             if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-                if (order_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(trans_no,secret_key, Urls.RouteOrder.NAMESPACE);
+                if (order_record.getCreator_id()!=user_info.getBody().getUid()){
                     error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
                 }
             }

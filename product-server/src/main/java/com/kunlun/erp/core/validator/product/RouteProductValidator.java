@@ -8,6 +8,7 @@ import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.product.RouteProductDto;
 import com.kunlun.erp.core.dto.product.request.*;
 import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
+import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.ProductInfo;
 import com.kunlun.erp.core.service.product.ProductService;
 import com.kunlun.erp.core.validator.AbstractValidator;
@@ -71,7 +72,7 @@ public class RouteProductValidator extends AbstractValidator {
 
         }else if (obj instanceof  RouteProductDetailRequest){
             RouteProductDetailRequest request = (RouteProductDetailRequest)obj;
-            error_code = this.checkProductCode(request.getBody().getProduct_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
+            error_code = this.checkProductCode(request.getBody().getProduct_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
         }else if (obj instanceof RouteProductEditRequest){
             RouteProductEditRequest request = (RouteProductEditRequest)obj;
             RouteProductDto req_body = request.getBody();
@@ -150,7 +151,8 @@ public class RouteProductValidator extends AbstractValidator {
         if (error_code == null){
             AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
             if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-                if (product_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(trans_no,secret_key, Urls.Product.NAMESPACE);
+                if (product_record.getCreator_id()!=user_info.getBody().getUid()){
                     error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
                 }
             }

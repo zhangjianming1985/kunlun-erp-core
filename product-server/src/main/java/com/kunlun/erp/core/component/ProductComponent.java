@@ -2,13 +2,16 @@ package com.kunlun.erp.core.component;
 
 import com.kunlun.erp.core.common.configuration.PermissionKeyProperties;
 import com.kunlun.erp.core.common.constants.SysConstant;
+import com.kunlun.erp.core.common.constants.Urls;
 import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.common.AreaDto;
 import com.kunlun.erp.core.dto.condition.ProductCondition;
 import com.kunlun.erp.core.dto.product.request.RouteProductListReqDto;
 import com.kunlun.erp.core.dto.product.request.RouteProductListRequest;
 import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
+import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.*;
+import com.kunlun.erp.core.service.account.AccountService;
 import com.kunlun.erp.core.service.account.PermissionService;
 import com.kunlun.erp.core.service.area.*;
 import com.kunlun.erp.core.validator.common.AreaValidator;
@@ -42,6 +45,8 @@ public class ProductComponent {
     private PermissionService permission_service;
     @Resource
     private PermissionKeyProperties per_properties;
+    @Resource(name = "account_service")
+    private AccountService account_service;
     /**
      * 重设产品地区数据
      * @param new_product
@@ -94,7 +99,8 @@ public class ProductComponent {
         condition.setProduct_category_code(request_body.getProduct_category_code());
         AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getQuery_all_data());
         if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-            condition.setUid(permission_dto.getBody().getUid());
+            AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(request.getHeader().getTrans_no(),request.getHeader().getSecret_key(), Urls.RouteOrder.NAMESPACE);
+            condition.setUid(user_info.getBody().getUid());
         }
         if (request_body.getArea()!=null){
             condition.setCountry_id(request_body.getArea().getCountry_id());

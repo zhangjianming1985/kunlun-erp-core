@@ -5,7 +5,6 @@ import com.kunlun.erp.core.common.constants.SysConstant;
 import com.kunlun.erp.core.common.constants.Urls;
 import com.kunlun.erp.core.common.util.RegexUtil;
 import com.kunlun.erp.core.dto.routeHall.RouteTrafficDto;
-import com.kunlun.erp.core.dto.routeHall.request.RouteMotorcadeAddRequest;
 import com.kunlun.erp.core.dto.routeHall.request.RouteTrafficAddRequest;
 import com.kunlun.erp.core.dto.routeHall.request.RouteTrafficListRequest;
 import com.kunlun.erp.core.dto.routeOrder.OrderClientDto;
@@ -50,9 +49,9 @@ public class RouteTrafficValidator extends AbstractValidator {
         if (obj instanceof RouteTrafficListRequest){
             RouteTrafficListRequest request = (RouteTrafficListRequest)obj;
             error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
-        }else if (obj instanceof RouteMotorcadeAddRequest){
+        }else if (obj instanceof RouteTrafficAddRequest){
             RouteTrafficAddRequest request = (RouteTrafficAddRequest)obj;
-            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
+            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             if (error_code == null){
                 error_code = this.checkTraffic(request.getBody().getTraffic_data());
             }

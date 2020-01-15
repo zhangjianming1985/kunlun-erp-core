@@ -51,7 +51,7 @@ public class RouteTicketValidator  extends AbstractValidator {
             error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
         }else if (obj instanceof RouteTicketAddRequest){
             RouteTicketAddRequest request = (RouteTicketAddRequest)obj;
-            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code());
+            error_code=route_hall_validator.checkGroupCode(request.getBody().getGroup_code(),request.getHeader().getTrans_no(),request.getHeader().getSecret_key(),per_properties.getEdit_all_data());
             if (error_code == null){
                 error_code = this.checkTicket(request.getBody().getTicket_data());
             }

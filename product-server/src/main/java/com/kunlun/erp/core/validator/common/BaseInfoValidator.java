@@ -2,11 +2,13 @@ package com.kunlun.erp.core.validator.common;
 
 import com.kunlun.erp.core.common.constants.ErrorCodeConstant;
 import com.kunlun.erp.core.common.constants.SysConstant;
+import com.kunlun.erp.core.common.constants.Urls;
 import com.kunlun.erp.core.common.util.RegexUtil;
 import com.kunlun.erp.core.component.CompanyComponent;
 import com.kunlun.erp.core.dto.AbstractResponse;
 import com.kunlun.erp.core.dto.company.request.CompanyAddReqDto;
 import com.kunlun.erp.core.dto.user.HasPermissionRespDto;
+import com.kunlun.erp.core.dto.user.UserInfoRespDto;
 import com.kunlun.erp.core.entity.CompanyInfo;
 import com.kunlun.erp.core.mapper.CompanyInfoMapper;
 import com.kunlun.erp.core.validator.AbstractValidator;
@@ -76,7 +78,8 @@ public class BaseInfoValidator extends AbstractValidator {
         if (error_code == null){
             AbstractResponse<HasPermissionRespDto> permission_dto = permission_service.getUserByPermission(trans_no,secret_key,per_key);
             if (permission_dto.getHeader().getState().equals(SysConstant.RespStatus.resp_status_fail.getValue())){
-                if (company_record.getCreator_id()!=permission_dto.getBody().getUid()){
+                AbstractResponse<UserInfoRespDto> user_info = account_service.getUserInfo(trans_no,secret_key, Urls.Company.NAMESPACE);
+                if (company_record.getCreator_id()!=user_info.getBody().getUid()){
                     error_code = ErrorCodeConstant.REQUEST_ILLEGAL;
                 }
             }
