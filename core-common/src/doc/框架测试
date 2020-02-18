@@ -21,14 +21,26 @@
     http://120.24.95.15:9898/swagger-ui.html#/
     http://120.24.95.15:10000/swagger-ui.html#/
 
-MYSQL服务器
+TEST MYSQL服务器
 120.24.95.15 root Root@2019
 
-SSH:
+TEST SSH:
 120.24.95.15 test test@2019
 
-REDIST:
+TEST REDIS:
 redis 密码JF@@mofang
+
+
+
+===================================================
+生产环境  http://erp.woyoubooking.com/login
+ip：119.23.42.127
+root XINjingjie@@
+
+MYSQL账号:woyou 密码:woyou!QAZ2wsx
+redis.host: 119.23.42.127
+redis.password: fjw1qaz@WSX
+redis.port: 6379
 
 项目启动脚本
 ps -ef | grep erp-core-server-1.0-SNAPSHOT.jar | grep -v 'grep' | awk -F ' ' '{print $2}' | xargs kill
