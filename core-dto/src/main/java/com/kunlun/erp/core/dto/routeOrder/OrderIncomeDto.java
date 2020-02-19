@@ -4,6 +4,8 @@ import com.kunlun.erp.core.common.constants.SysConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.math.BigDecimal;
+
 /**
  * @ClassName OrderIncomeDto
  * @Description 线路订单销售款明细
@@ -102,7 +104,7 @@ public class OrderIncomeDto {
         return total_price;
     }
     public Double getTotal_price_double(){
-        return Double.valueOf(this.total_price);
+        return new BigDecimal(this.total_price).doubleValue();
     }
 
     public void setTotal_price(String total_price) {

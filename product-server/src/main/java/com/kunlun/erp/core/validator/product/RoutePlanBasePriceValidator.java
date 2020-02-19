@@ -106,7 +106,7 @@ public class RoutePlanBasePriceValidator {
      * @return
      */
     public String checkPrice(String price){
-        if (RegexUtil.isDecimal(price)==false || ArithmeticUtil.compare(price,"0")==false){
+        if (RegexUtil.isDecimal(price)==false || ArithmeticUtil.compare(price,"0")==false ){
             return ErrorCodeConstant.PRODUCT_ROUTE_PLAN_PRICE_INVALID;
         }
         return  null;
@@ -136,6 +136,18 @@ public class RoutePlanBasePriceValidator {
             return ErrorCodeConstant.PRODUCT_ROUTE_PLAN_TOTAL_PRICE_INVALID;
         }
 
+        return  null;
+    }
+
+    /**
+     * 总价
+     * @param total_price
+     * @return
+     */
+    public String checkTotalPrice(String total_price){
+        if (RegexUtil.isDecimal(total_price)==false){
+            return ErrorCodeConstant.PRODUCT_ROUTE_PLAN_TOTAL_PRICE_INVALID;
+        }
         return  null;
     }
 }

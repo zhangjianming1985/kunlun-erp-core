@@ -233,10 +233,25 @@ public class RouteOrderValidator extends AbstractValidator {
                     error_code = ErrorCodeConstant.ROUTE_ORDER_INCOME_SIZE_INVALID;
                     break;
                 }
+/*
+                需求变更：团款单项总金额 可为负数，因此取消 单价  数量  金额的一致性校验。 但须校验合计
                 error_code = route_plan_price_validator.checkTotalPrice(dto.getTotal_price(),dto.getQuantity(),dto.getPrice());
                 if (error_code !=null){
                     error_code = ErrorCodeConstant.ROUTE_ORDER_INCOME_TOTAL_PRICE_INVALID;
                     break;
+                }*/
+                //可为负数，那么只校验数字的合法性
+                error_code = route_plan_price_validator.checkTotalPrice(dto.getTotal_price());
+                if (error_code !=null){
+                    error_code = ErrorCodeConstant.ROUTE_ORDER_INCOME_TOTAL_PRICE_INVALID;
+                    break;
+                }
+            }
+            if (error_code == null){
+                //校验合计
+                double income_total_amount = income_data.stream().mapToDouble(OrderIncomeDto::getTotal_price_double).sum();
+                if (income_total_amount < 0){
+                    error_code = ErrorCodeConstant.ROUTE_ORDER_INCOME_TOTAL_PRICE_INVALID;
                 }
             }
         }
